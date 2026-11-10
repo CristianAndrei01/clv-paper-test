@@ -1,0 +1,1528 @@
+Faza 0 — 2026-11-10T20:26:02+00:00
+
+==============================================================================
+0. Cheile caselor (din /freshness)
+==============================================================================
+   GET /freshness {} -> 200, 79,321 B, 0.3s [X-Daily-Remaining=?]
+   119 case cunoscute de API
+   pinnacle    : DA  (market_count=260697, staleness_s=0, is_stale=False)
+   draftkings  : DA  (market_count=210058, staleness_s=6, is_stale=False)
+   fanduel     : DA  (market_count=200656, staleness_s=0, is_stale=False)
+   betfair_ex  : DA  (market_count=45830, staleness_s=0, is_stale=False)
+   superbet_ro : DA  (market_count=33056, staleness_s=58, is_stale=False)
+   netbet_ro   : DA  (market_count=3619, staleness_s=152, is_stale=False)
+   mozzart     : DA  (market_count=23751, staleness_s=36, is_stale=False)
+
+--- FORMA: /freshness (o casă) ---
+{
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "market_count": 260697,
+   "market_classes": {
+    "game_lines": {
+     "market_count": 216336,
+     "latest_update": "2026-11-10T20:25:50.827050+00:00",
+     "staleness_seconds": 0,
+     "active_market_count": 8803,
+     "oldest_market_update": "2026-11-05T15:42:22.418492+00:00",
+     "worst_staleness_seconds": 449009,
+     "suspended_market_count": 322
+    },
+    "props": {
+     "market_count": 44361,
+     "latest_update": "2026-11-10T20:25:45.113431+00:00",
+     "staleness_seconds": 6,
+     "active_market_count": 1227,
+     "oldest_market_update": "2026-11-09T12:02:20.469761+00:00",
+     "worst_staleness_seconds": 116611,
+     "suspended_market_count": 59
+    }
+   },
+   "latest_update": "2026-11-10T20:25:50.827050+00:00",
+   "staleness_seconds": 0,
+   "is_stale": false,
+   "worst_staleness_seconds": 449009,
+   "suspended_market_count": 381
+  }
+ ]
+}
+
+==============================================================================
+1+2. NBA /odds/closing player_points — Pinnacle prezent? price = închidere? linia separată?
+==============================================================================
+   GET /sports/basketball_nba/scores {'days_from': 3} -> 200, 76,376 B, 1.1s [X-Daily-Remaining=4992]
+   statusuri în /scores: Counter({'upcoming': 99, 'final': 22})
+
+--- FORMA: /scores NBA ---
+[
+ {
+  "home_team_key": "warriors",
+  "away_team_key": "nuggets",
+  "home_team_id": "nba:1610612744",
+  "away_team_id": "nba:1610612743",
+  "home_team_logo_url": "https://a.espncdn.com/i/teamlogos/nba/500/gs.png",
+  "away_team_logo_url": "https://a.espncdn.com/i/teamlogos/nba/500/den.png",
+  "id": "129679",
+  "sport_key": "basketball_nba",
+  "home_team": "Golden State Warriors",
+  "away_team": "Denver Nuggets",
+  "commence_time": "2026-12-26T03:40:00Z",
+  "live": false,
+  "espn_event_id": null,
+  "mlb_game_pk": null,
+  "tournament": null,
+  "tour": null,
+  "status": "upcoming",
+  "home_score": null,
+  "away_score": null,
+  "period": null,
+  "clock": null,
+  "situation": null,
+  "last_play": null,
+  "state_updated_at": null
+ },
+ "… (+1 elemente, total 2)"
+]
+   meciuri încheiate selectate: [('New Orleans Pelicans @ Golden State Warriors', '2026-11-10T03:00:00Z'), ('San Antonio Spurs @ Phoenix Suns', '2026-11-10T02:00:00Z'), ('Denver Nuggets @ Houston Rockets', '2026-11-10T01:30:00Z')]
+   GET /sports/basketball_nba/events/641560/odds/closing {'markets': 'player_points', 'bookmakers': 'pinnacle,draftkings,fanduel'} -> 200, 301,719 B, 0.6s [X-Daily-Remaining=4992]
+
+--- FORMA: /odds/closing NBA player_points ---
+{
+ "id": "641560",
+ "sport_key": "basketball_nba",
+ "home_team": "Golden State Warriors",
+ "away_team": "New Orleans Pelicans",
+ "commence_time": "2026-11-10T03:00:00Z",
+ "bookmakers": [
+  {
+   "key": "draftkings",
+   "title": "DraftKings",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Draymond Green Points O/U",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Draymond Green",
+       "outcome_id": 16262909117,
+       "price": -116,
+       "point": 5.5,
+       "closing_at": "2026-11-10T02:58:13.783633Z",
+       "closing_age_seconds": 106,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -102,
+       "opening_point": 6.5,
+       "opening_at": "2026-11-09T07:02:37.474845Z",
+       "opening_age_seconds": 71842,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Under",
+       "description": "Draymond Green",
+       "outcome_id": 16262909118,
+       "price": -110,
+       "point": 5.5,
+       "closing_at": "2026-11-10T02:58:13.783633Z",
+       "closing_age_seconds": 106,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -125,
+       "opening_point": 6.5,
+       "opening_at": "2026-11-09T07:02:37.474845Z",
+       "opening_age_seconds": 71842,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Yaxel Lendeborg Points",
+     "period": null,
+     "team": null,
+     "line_type": "milestone",
+     "outcomes": [
+      {
+       "name": "10+ Points",
+       "description": "Yaxel Lendeborg",
+       "outcome_id": 16263646649,
+       "price": -1740,
+       "point": null,
+       "closing_at": "2026-11-09T23:17:05.810327Z",
+       "closing_age_seconds": 13374,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -1740,
+       "opening_point": null,
+       "opening_at": "2026-11-09T23:17:05.810327Z",
+       "opening_age_seconds": 13374,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "12+ Points",
+       "description": "Yaxel Lendeborg",
+       "outcome_id": 16262909149,
+       "price": -1000,
+       "point": null,
+       "closing_at": "2026-11-10T02:31:21.520295Z",
+       "closing_age_seconds": 1718,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -1080,
+       "opening_point": null,
+       "opening_at": "2026-11-09T07:02:37.474845Z",
+       "opening_age_seconds": 71842,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      "… (+16 elemente, total 18)"
+     ]
+    },
+    "… (+34 elemente, total 36)"
+   ]
+  },
+  {
+   "key": "fanduel",
+   "title": "FanDuel",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Yaxel Lendeborg - Points",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Yaxel Lendeborg",
+       "outcome_id": 16262854184,
+       "price": -118,
+       "point": 19.5,
+       "closing_at": "2026-11-10T02:55:50.909655Z",
+       "closing_age_seconds": 249,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -130,
+       "opening_point": 19.5,
+       "opening_at": "2026-11-09T05:42:37.694398Z",
+       "opening_age_seconds": 76642,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Under",
+       "description": "Yaxel Lendeborg",
+       "outcome_id": 16262854185,
+       "price": -108,
+       "point": 19.5,
+       "closing_at": "2026-11-10T02:55:50.909655Z",
+       "closing_age_seconds": 249,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": -102,
+       "opening_point": 19.5,
+       "opening_at": "2026-11-09T05:42:37.694398Z",
+       "opening_age_seconds": 76642,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Draymond Green - Points",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Draymond Green",
+       "outcome_id": 16262863182,
+       "price": -118,
+       "point": 5.5,
+       "closing_at": "2026-11-09T13:04:21.041093Z",
+       "closing_age_seconds": 50138,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": 104,
+       "opening_point": 6.5,
+       "opening_at": "2026-11-09T05:52:03.577912Z",
+       "opening_age_seconds": 76076,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Under",
+       "description": "Draymond Green",
+       "outcome_id": 16262863183,
+       "price": -112,
+       "point": 5.5,
+       "closing_at": "2026-11-09T13:04:21.041093Z",
+       "closing_age_seconds": 50138,
+       "closing_last_seen_at": "2026-11-10T03:00:00Z",
+       "is_stale
+… [trunchiat la afișare; complet în phase0_out/raw]
+   New Orleans Pelicans @ Golden State Warriors (start 2026-11-10T03:00:00Z):
+   pinnacle    : 14 piețe, 28 rezultate, 14 jucători/selecții, cu preț=28, redacted=0, is_stale=4, line_type={'main': 28}
+                 closing_at după start=0, opening_at<closing_at=26, linie mutată (opening_point≠point)=12/28 = 42.9%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=314
+                 ex. linie mutată: Dejounte Murray Over: deschidere 16.5 @ 100 (2026-11-09T14:49:43.970546Z) → închidere 18.5 @ 122 (2026-11-10T02:54:45.396893Z)
+                 ex. linie mutată: Dejounte Murray Under: deschidere 16.5 @ -132 (2026-11-09T14:49:43.970546Z) → închidere 18.5 @ -163 (2026-11-10T02:54:45.396893Z)
+                 ex. linie mutată: Derik Queen Over: deschidere 8.5 @ -133 (2026-11-09T14:49:43.970546Z) → închidere 12.5 @ 108 (2026-11-10T02:54:45.396893Z)
+   draftkings  : 36 piețe, 271 rezultate, 18 jucători/selecții, cu preț=200, redacted=0, is_stale=27, line_type={'main': 36, 'milestone': 235}
+                 closing_at după start=0, opening_at<closing_at=198, linie mutată (opening_point≠point)=22/34 = 64.7%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=269
+                 ex. linie mutată: Draymond Green Over: deschidere 6.5 @ -102 (2026-11-09T07:02:37.474845Z) → închidere 5.5 @ -116 (2026-11-10T02:58:13.783633Z)
+                 ex. linie mutată: Draymond Green Under: deschidere 6.5 @ -125 (2026-11-09T07:02:37.474845Z) → închidere 5.5 @ -110 (2026-11-10T02:58:13.783633Z)
+                 ex. linie mutată: Yaxel Lendeborg Over: deschidere 20.5 @ -103 (2026-11-09T07:02:37.474845Z) → închidere 19.5 @ -117 (2026-11-10T02:24:38.133417Z)
+   fanduel     : 35 piețe, 327 rezultate, 18 jucători/selecții, cu preț=327, redacted=0, is_stale=30, line_type={'main': 36, 'milestone': 291}
+                 closing_at după start=0, opening_at<closing_at=326, linie mutată (opening_point≠point)=22/36 = 61.1%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=74
+                 ex. linie mutată: Draymond Green Over: deschidere 6.5 @ 104 (2026-11-09T05:52:03.577912Z) → închidere 5.5 @ -118 (2026-11-09T13:04:21.041093Z)
+                 ex. linie mutată: Draymond Green Under: deschidere 6.5 @ -138 (2026-11-09T05:52:03.577912Z) → închidere 5.5 @ -112 (2026-11-09T13:04:21.041093Z)
+                 ex. linie mutată: Zion Williamson Over: deschidere 20.5 @ -102 (2026-11-09T06:22:37.941198Z) → închidere 19.5 @ -118 (2026-11-09T21:39:55.070800Z)
+   GET /sports/basketball_nba/events/641564/odds/closing {'markets': 'player_points', 'bookmakers': 'pinnacle,draftkings,fanduel'} -> 200, 267,647 B, 0.5s [X-Daily-Remaining=4992]
+   San Antonio Spurs @ Phoenix Suns (start 2026-11-10T02:00:00Z):
+   pinnacle    : 13 piețe, 26 rezultate, 13 jucători/selecții, cu preț=26, redacted=0, is_stale=2, line_type={'main': 26}
+                 closing_at după start=0, opening_at<closing_at=25, linie mutată (opening_point≠point)=12/26 = 46.2%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=12506
+                 ex. linie mutată: De'Aaron Fox Over: deschidere 13.5 @ 100 (2026-11-09T05:02:31.232483Z) → închidere 14.5 @ -114 (2026-11-09T19:00:13.662889Z)
+                 ex. linie mutată: De'Aaron Fox Under: deschidere 13.5 @ -132 (2026-11-09T05:02:31.232483Z) → închidere 14.5 @ -116 (2026-11-09T19:00:13.662889Z)
+                 ex. linie mutată: Devin Booker Over: deschidere 23.5 @ -120 (2026-11-09T05:02:31.232483Z) → închidere 24.5 @ -106 (2026-11-10T00:02:17.226979Z)
+   draftkings  : 32 piețe, 244 rezultate, 16 jucători/selecții, cu preț=176, redacted=0, is_stale=18, line_type={'milestone': 212, 'main': 32}
+                 closing_at după start=0, opening_at<closing_at=176, linie mutată (opening_point≠point)=12/32 = 37.5%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=1873
+                 ex. linie mutată: De'Aaron Fox Over: deschidere 12.5 @ -125 (2026-11-09T06:02:37.643356Z) → închidere 14.5 @ -106 (2026-11-10T01:25:50.236515Z)
+                 ex. linie mutată: De'Aaron Fox Under: deschidere 12.5 @ -102 (2026-11-09T06:02:37.643356Z) → închidere 14.5 @ -120 (2026-11-10T01:25:50.236515Z)
+                 ex. linie mutată: Julian Champagnie Over: deschidere 9.5 @ -105 (2026-11-09T06:02:37.643356Z) → închidere 11.5 @ -102 (2026-11-10T00:21:25.104644Z)
+   fanduel     : 31 piețe, 287 rezultate, 16 jucători/selecții, cu preț=287, redacted=0, is_stale=3, line_type={'milestone': 255, 'main': 32}
+                 closing_at după start=0, opening_at<closing_at=287, linie mutată (opening_point≠point)=16/32 = 50.0%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=37
+                 ex. linie mutată: De'Aaron Fox Over: deschidere 13.5 @ -108 (2026-11-09T01:27:45.395944Z) → închidere 14.5 @ 102 (2026-11-10T01:52:41.254973Z)
+                 ex. linie mutată: De'Aaron Fox Under: deschidere 13.5 @ -122 (2026-11-09T01:27:45.395944Z) → închidere 14.5 @ -130 (2026-11-10T01:52:41.254973Z)
+                 ex. linie mutată: Devin Booker Over: deschidere 23.5 @ -118 (2026-11-09T01:40:30.617393Z) → închidere 24.5 @ -102 (2026-11-10T01:57:57.841861Z)
+   GET /sports/basketball_nba/events/641569/odds/closing {'markets': 'player_points', 'bookmakers': 'pinnacle,draftkings,fanduel'} -> 200, 267,445 B, 0.5s [X-Daily-Remaining=4990]
+   Denver Nuggets @ Houston Rockets (start 2026-11-10T01:30:00Z):
+   pinnacle    : 12 piețe, 24 rezultate, 12 jucători/selecții, cu preț=24, redacted=0, is_stale=0, line_type={'main': 24}
+                 closing_at după start=0, opening_at<closing_at=19, linie mutată (opening_point≠point)=6/24 = 25.0%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=130
+                 ex. linie mutată: Jamal Murray Over: deschidere 20.5 @ -125 (2026-11-09T14:53:43.500381Z) → închidere 21.5 @ -127 (2026-11-10T01:27:49.970932Z)
+                 ex. linie mutată: Jamal Murray Under: deschidere 20.5 @ -106 (2026-11-09T14:53:43.500381Z) → închidere 21.5 @ -104 (2026-11-10T01:27:49.970932Z)
+                 ex. linie mutată: Marcus Smart Over: deschidere 7.5 @ -112 (2026-11-09T07:21:33.922123Z) → închidere 6.5 @ -130 (2026-11-10T01:27:49.970932Z)
+   draftkings  : 30 piețe, 231 rezultate, 15 jucători/selecții, cu preț=177, redacted=0, is_stale=10, line_type={'milestone': 201, 'main': 30}
+                 closing_at după start=0, opening_at<closing_at=176, linie mutată (opening_point≠point)=16/30 = 53.3%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=798
+                 ex. linie mutată: Aaron Gordon Over: deschidere 11.5 @ -129 (2026-11-09T19:20:37.949677Z) → închidere 12.5 @ 100 (2026-11-10T01:10:10.148935Z)
+                 ex. linie mutată: Aaron Gordon Under: deschidere 11.5 @ 101 (2026-11-09T19:20:37.949677Z) → închidere 12.5 @ -128 (2026-11-10T01:10:10.148935Z)
+                 ex. linie mutată: Alperen Sengun Over: deschidere 20.5 @ -104 (2026-11-09T06:02:36.852704Z) → închidere 19.5 @ -125 (2026-11-10T01:11:15.586340Z)
+   fanduel     : 30 piețe, 301 rezultate, 15 jucători/selecții, cu preț=301, redacted=0, is_stale=14, line_type={'milestone': 271, 'main': 30}
+                 closing_at după start=0, opening_at<closing_at=299, linie mutată (opening_point≠point)=16/30 = 53.3%, (jucător,parte) cu >1 linie=0, closing_age_seconds median=1100
+                 ex. linie mutată: Alperen Sengun Over: deschidere 20.5 @ -108 (2026-11-09T05:32:35.549620Z) → închidere 19.5 @ -132 (2026-11-10T01:18:13.806135Z)
+                 ex. linie mutată: Alperen Sengun Under: deschidere 20.5 @ -122 (2026-11-09T05:32:35.549620Z) → închidere 19.5 @ 104 (2026-11-10T01:18:13.806135Z)
+                 ex. linie mutată: Amen Thompson Over: deschidere 16.5 @ -106 (2026-11-09T05:32:35.549620Z) → închidere 15.5 @ -115 (2026-11-10T01:11:39.686259Z)
+
+   LINIE MUTATĂ ÎNTRE DESCHIDERE ȘI ÎNCHIDERE, total pe cele 3 meciuri NBA (per rezultat over/under):
+     pinnacle    : 30/78 = 38.5%
+     draftkings  : 50/96 = 52.1%
+     fanduel     : 54/98 = 55.1%
+   GET /sports/basketball_nba/events/641560/odds/history {'markets': 'player_points', 'bookmakers': 'pinnacle', 'changes_only': 'true'} -> 200, 37,536 B, 0.3s [X-Daily-Remaining=4988]
+
+--- FORMA: /odds/history NBA player_points pinnacle ---
+{
+ "id": "641560",
+ "sport_key": "basketball_nba",
+ "home_team": "Golden State Warriors",
+ "away_team": "New Orleans Pelicans",
+ "commence_time": "2026-11-10T03:00:00Z",
+ "live": false,
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Brandin Podziemski Total Points",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Brandin Podziemski",
+       "outcome_id": 16263301199,
+       "snapshots": [
+        {
+         "price": -114,
+         "point": 15.5,
+         "recorded_at": "2026-11-09T14:49:43.970546Z",
+         "book_updated_at": "2026-11-09T14:49:00Z",
+         "book_version": 6630425453,
+         "liquidity": 250.0
+        },
+        {
+         "price": -110,
+         "point": 15.5,
+         "recorded_at": "2026-11-09T22:07:01.525871Z",
+         "book_updated_at": "2026-11-09T22:06:49Z",
+         "book_version": 6630874867,
+         "liquidity": 250.0
+        },
+        "… (+1 elemente, total 3)"
+       ],
+       "snapshots_available": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Under",
+       "description": "Brandin Podziemski",
+       "outcome_id": 16263301200,
+       "snapshots": [
+        {
+         "price": -114,
+         "point": 15.5,
+         "recorded_at": "2026-11-09T14:49:43.970546Z",
+         "book_updated_at": "2026-11-09T14:49:00Z",
+         "book_version": 6630425453,
+         "liquidity": 250.0
+        },
+        {
+         "price": -120,
+         "point": 15.5,
+         "recorded_at": "2026-11-09T22:07:01.525871Z",
+         "book_updated_at": "2026-11-09T22:06:49Z",
+         "book_version": 6630874867,
+         "liquidity": 250.0
+        },
+        "… (+1 elemente, total 3)"
+       ],
+       "snapshots_available": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "De'Anthony Melton Total Points",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "De'Anthony Melton",
+       "outcome_id": 16263301201,
+       "snapshots": [
+        {
+         "price": -102,
+         "point": 9.5,
+         "recorded_at": "2026-11-09T14:49:43.970546Z",
+         "book_updated_at": "2026-11-09T14:49:00Z",
+         "book_version": 6630425453,
+         "liquidity": 250.0
+        },
+        {
+         "price": 100,
+         "point": 9.5,
+         "recorded_at": "2026-11-09T15:04:41.136742Z",
+         "book_updated_at": "2026-11-09T15:04:05Z",
+         "book_version": 6630433638,
+         "liquidity": 250.0
+        },
+        "… (+1 elemente, total 3)"
+       ],
+       "snapshots_available": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Under",
+       "description": "De'Anthony Melton",
+       "outcome_id": 16263301202,
+       "snapshots": [
+        {
+         "price": -130,
+         "point": 9.5,
+         "recorded_at": "2026-11-09T14:49:43.970546Z",
+         "book_updated_at": "2026-11-09T14:49:00Z",
+         "book_version": 6630425453,
+         "liquidity": 250.0
+        },
+        {
+         "price": -133,
+         "point": 9.5,
+         "recorded_at": "2026-11-09T15:04:41.136742Z",
+         "book_updated_at": "2026-11-09T15:04:05Z",
+         "book_version": 6630433638,
+         "liquidity": 250.0
+        },
+        "… (+1 elemente, total 3)"
+       ],
+       "snapshots_available": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    },
+    "… (+12 elemente, total 14)"
+   ]
+  }
+ ],
+ "upgrade_url": null
+}
+   history vs closing (Pinnacle): 28 identice, 0 diferite
+     Dejounte Murray Over: history primul=16.5@100 ultim≤start=18.5@122 (2026-11-10T02:54:45.396893Z) | closing=18.5@122 (2026-11-10T02:54:45.396893Z), opening=16.5@100
+     Dejounte Murray Under: history primul=16.5@-132 ultim≤start=18.5@-163 (2026-11-10T02:54:45.396893Z) | closing=18.5@-163 (2026-11-10T02:54:45.396893Z), opening=16.5@-132
+     Derik Queen Over: history primul=8.5@-133 ultim≤start=12.5@108 (2026-11-10T02:54:45.396893Z) | closing=12.5@108 (2026-11-10T02:54:45.396893Z), opening=8.5@-133
+     Derik Queen Under: history primul=8.5@101 ultim≤start=12.5@-143 (2026-11-10T02:54:45.396893Z) | closing=12.5@-143 (2026-11-10T02:54:45.396893Z), opening=8.5@101
+
+==============================================================================
+3. Fotbal h2h — betfair_ex / superbet_ro / netbet_ro / mozzart au cote aproape de start?
+==============================================================================
+
+   [soccer_italy_serie_b] — meciuri viitoare (/odds)
+   GET /sports/soccer_italy_serie_b/odds {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 35,438 B, 0.3s [X-Daily-Remaining=4988]
+
+--- FORMA: /odds soccer_italy_serie_b h2h ---
+[
+ {
+  "home_team_key": "hellas_verona",
+  "away_team_key": "cesena",
+  "home_team_id": "espn.soccer:119",
+  "away_team_id": "espn.soccer:3337",
+  "home_team_logo_url": "https://a.espncdn.com/i/teamlogos/soccer/500/119.png",
+  "away_team_logo_url": "https://a.espncdn.com/i/teamlogos/soccer/500/3337.png",
+  "id": "724626",
+  "sport_key": "soccer_italy_serie_b",
+  "home_team": "Verona",
+  "away_team": "Cesena",
+  "commence_time": "2026-11-20T19:30:00Z",
+  "live": false,
+  "is_outright": false,
+  "tournament": null,
+  "tour": null,
+  "last_update": "2026-11-10T20:15:55.037550Z",
+  "merged_from_event_ids": null,
+  "bookmakers": [
+   {
+    "key": "draftkings",
+    "title": "DraftKings",
+    "last_update": "2026-11-10T20:15:54.439222Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "h2h",
+      "description": "Moneyline",
+      "last_update": "2026-11-10T20:15:54.439222Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Verona",
+        "description": "",
+        "price": -140,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T10:50:58.424546Z",
+        "last_seen_at": "2026-11-10T20:15:54.439222Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "home"
+       },
+       {
+        "name": "Cesena",
+        "description": "",
+        "price": 350,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T10:50:58.424546Z",
+        "last_seen_at": "2026-11-10T20:15:54.439222Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "away"
+       },
+       {
+        "name": "Draw",
+        "description": "",
+        "price": 265,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T10:50:58.424546Z",
+        "last_seen_at": "2026-11-10T20:15:54.439222Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "draw"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "pinnacle",
+    "title": "Pinnacle",
+    "last_update": "2026-11-10T20:15:55.037550Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "h2h",
+      "description": "Moneyline",
+      "last_update": "2026-11-10T20:15:55.037550Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Hellas Verona",
+        "description": "",
+        "price": -135,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:05:27Z",
+        "book_version": 3800404143,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-09T14:51:40.751428Z",
+        "last_seen_at": "2026-11-10T20:15:55.037550Z",
+        "liquidity": 300.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "home"
+       },
+       {
+        "name": "Cesena",
+        "description": "",
+        "price": 390,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:05:27Z",
+        "book_version": 3800404143,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-09T14:51:40.751428Z",
+        "last_seen_at": "2026-11-10T20:15:55.037550Z",
+        "liquidity": 300.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "away"
+       },
+       {
+        "name": "Draw",
+        "description": "",
+        "price": 268,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:05:27Z",
+        "book_version": 3800404143,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-09T14:51:40.751428Z",
+        "last_seen_at": "2026-11-10T20:15:55.037550Z",
+        "liquidity": 300.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "draw"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
+   10 meciuri cu cote; 0 încep în ≤72h
+     pinnacle    : în 10/10 meciuri total, 0/0 în ≤72h
+     betfair_ex  : în 0/10 meciuri total, 0/0 în ≤72h
+     superbet_ro : în 0/10 meciuri total, 0/0 în ≤72h
+     netbet_ro   : în 0/10 meciuri total, 0/0 în ≤72h
+     mozzart     : în 0/10 meciuri total, 0/0 în ≤72h
+
+   [soccer_italy_serie_b] — meciuri încheiate (/odds/closing): câte case aveau cotă la start și de când
+   GET /sports/soccer_italy_serie_b/scores {'days_from': 3} -> 200, 8,264 B, 1.1s [X-Daily-Remaining=4986]
+   meciuri încheiate selectate: [('Vicenza – Cremonese', '2026-11-08T18:30:00Z'), ('Carrarese – Sampdoria', '2026-11-08T16:15:00Z')]
+   GET /sports/soccer_italy_serie_b/events/685220/odds/closing {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 3,276 B, 0.4s [X-Daily-Remaining=4986]
+
+--- FORMA: /odds/closing soccer_italy_serie_b h2h ---
+{
+ "id": "685220",
+ "sport_key": "soccer_italy_serie_b",
+ "home_team": "Vicenza",
+ "away_team": "Cremonese",
+ "commence_time": "2026-11-08T18:30:00Z",
+ "bookmakers": [
+  {
+   "key": "draftkings",
+   "title": "DraftKings",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Vicenza",
+       "description": "",
+       "outcome_id": 16255656057,
+       "price": 250,
+       "point": null,
+       "closing_at": "2026-11-08T17:48:52.934709Z",
+       "closing_age_seconds": 2467,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": 185,
+       "opening_point": null,
+       "opening_at": "2026-11-02T07:02:52.445899Z",
+       "opening_age_seconds": 559627,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Cremonese",
+       "description": "",
+       "outcome_id": 16255656055,
+       "price": 120,
+       "point": null,
+       "closing_at": "2026-11-08T17:43:11.504456Z",
+       "closing_age_seconds": 2808,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": 140,
+       "opening_point": null,
+       "opening_at": "2026-11-02T07:02:52.445899Z",
+       "opening_age_seconds": 559627,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16255656056,
+       "price": 220,
+       "point": null,
+       "closing_at": "2026-11-08T17:48:52.934709Z",
+       "closing_age_seconds": 2467,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": null,
+       "book_version": null,
+       "opening_price": 220,
+       "opening_point": null,
+       "opening_at": "2026-11-02T07:02:52.445899Z",
+       "opening_age_seconds": 559627,
+       "liquidity": null,
+       "opening_liquidity": null,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Vicenza",
+       "description": "",
+       "outcome_id": 16255026441,
+       "price": 268,
+       "point": null,
+       "closing_at": "2026-11-08T18:24:54.607766Z",
+       "closing_age_seconds": 305,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:24:32Z",
+       "book_version": 3799826056,
+       "opening_price": 195,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Cremonese",
+       "description": "",
+       "outcome_id": 16255026439,
+       "price": 126,
+       "point": null,
+       "closing_at": "2026-11-08T18:10:38.887249Z",
+       "closing_age_seconds": 1161,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:09:26Z",
+       "book_version": 3799779544,
+       "opening_price": 145,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16255026440,
+       "price": 216,
+       "point": null,
+       "closing_at": "2026-11-08T18:24:54.607766Z",
+       "closing_age_seconds": 305,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:24:32Z",
+       "book_version": 3799826056,
+       "opening_price": 223,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "upgrade_url": null
+}
+   Vicenza – Cremonese (start 2026-11-08T18:30:00Z):
+     pinnacle    : 3 rezultate [('Vicenza', 268), ('Cremonese', 126), ('Draw', 216)]; prima cotă cu 167.5h înainte, ultima cu 5 min înainte de start; is_stale=0
+     betfair_ex  : ABSENT
+     superbet_ro : ABSENT
+     netbet_ro   : ABSENT
+     mozzart     : ABSENT
+   GET /sports/soccer_italy_serie_b/events/684734/odds/closing {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 3,278 B, 0.3s [X-Daily-Remaining=4991]
+   Carrarese – Sampdoria (start 2026-11-08T16:15:00Z):
+     pinnacle    : 3 rezultate [('Carrarese', 139), ('Sampdoria', 255), ('Draw', 202)]; prima cotă cu 167.6h înainte, ultima cu 4 min înainte de start; is_stale=0
+     betfair_ex  : ABSENT
+     superbet_ro : ABSENT
+     netbet_ro   : ABSENT
+     mozzart     : ABSENT
+
+   [soccer_spain_segunda_division] — meciuri viitoare (/odds)
+   GET /sports/soccer_spain_segunda_division/odds {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 35,605 B, 0.3s [X-Daily-Remaining=4984]
+
+--- FORMA: /odds soccer_spain_segunda_division h2h ---
+[
+ {
+  "home_team_key": "leganes",
+  "away_team_key": "burgos",
+  "home_team_id": "espn.soccer:17534",
+  "away_team_id": "espn.soccer:12597",
+  "home_team_logo_url": "https://a.espncdn.com/i/teamlogos/soccer/500/17534.png",
+  "away_team_logo_url": "https://a.espncdn.com/i/teamlogos/soccer/500/12597.png",
+  "id": "718588",
+  "sport_key": "soccer_spain_segunda_division",
+  "home_team": "Leganés",
+  "away_team": "Burgos",
+  "commence_time": "2026-11-13T19:30:00Z",
+  "live": false,
+  "is_outright": false,
+  "tournament": null,
+  "tour": null,
+  "last_update": "2026-11-10T20:16:39.779530Z",
+  "merged_from_event_ids": null,
+  "bookmakers": [
+   {
+    "key": "draftkings",
+    "title": "DraftKings",
+    "last_update": "2026-11-10T20:16:38.859387Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "h2h",
+      "description": "Moneyline",
+      "last_update": "2026-11-10T20:16:38.859387Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Leganes",
+        "description": "",
+        "price": 120,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-09T08:26:41.427641Z",
+        "last_seen_at": "2026-11-10T20:16:38.859387Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "home"
+       },
+       {
+        "name": "Burgos CF",
+        "description": "",
+        "price": 235,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T19:34:38.096591Z",
+        "last_seen_at": "2026-11-10T20:16:38.859387Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "away"
+       },
+       {
+        "name": "Draw",
+        "description": "",
+        "price": 215,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T19:34:38.096591Z",
+        "last_seen_at": "2026-11-10T20:16:38.859387Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "draw"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "key": "pinnacle",
+    "title": "Pinnacle",
+    "last_update": "2026-11-10T20:16:39.779530Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "h2h",
+      "description": "Moneyline",
+      "last_update": "2026-11-10T20:16:39.779530Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Leganes",
+        "description": "",
+        "price": 124,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:06:23Z",
+        "book_version": 3800279358,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-09T08:34:45.489647Z",
+        "last_seen_at": "2026-11-10T20:16:39.779530Z",
+        "liquidity": 900.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "home"
+       },
+       {
+        "name": "Burgos",
+        "description": "",
+        "price": 247,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:06:23Z",
+        "book_version": 3800993701,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T13:07:16.119919Z",
+        "last_seen_at": "2026-11-10T20:16:39.779530Z",
+        "liquidity": 900.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "away"
+       },
+       {
+        "name": "Draw",
+        "description": "",
+        "price": 220,
+        "point": null,
+        "book_updated_at": "2026-11-10T20:06:23Z",
+        "book_version": 3800993701,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T13:07:16.119919Z",
+        "last_seen_at": "2026-11-10T20:16:39.779530Z",
+        "liquidity": 900.0,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": null,
+        "side": "draw"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]
+   10 meciuri cu cote; 1 încep în ≤72h
+     pinnacle    : în 10/10 meciuri total, 1/1 în ≤72h
+     betfair_ex  : în 0/10 meciuri total, 0/1 în ≤72h
+     superbet_ro : în 0/10 meciuri total, 0/1 în ≤72h
+     netbet_ro   : în 0/10 meciuri total, 0/1 în ≤72h
+     mozzart     : în 0/10 meciuri total, 0/1 în ≤72h
+
+   [soccer_spain_segunda_division] — meciuri încheiate (/odds/closing): câte case aveau cotă la start și de când
+   GET /sports/soccer_spain_segunda_division/scores {'days_from': 3} -> 200, 10,457 B, 0.4s [X-Daily-Remaining=4991]
+   meciuri încheiate selectate: [('UD Las Palmas – CD Eldense', '2026-11-09T19:30:00Z'), ('Gijon – Valladolid', '2026-11-08T17:30:00Z')]
+   GET /sports/soccer_spain_segunda_division/events/685074/odds/closing {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 3,293 B, 1.4s [X-Daily-Remaining=4981]
+   UD Las Palmas – CD Eldense (start 2026-11-09T19:30:00Z):
+     pinnacle    : 3 rezultate [('Las Palmas', 114), ('Eldense', 260), ('Draw', 251)]; prima cotă cu 61.8h înainte, ultima cu 9 min înainte de start; is_stale=0
+     betfair_ex  : ABSENT
+     superbet_ro : ABSENT
+     netbet_ro   : ABSENT
+     mozzart     : ABSENT
+   GET /sports/soccer_spain_segunda_division/events/685027/odds/closing {'markets': 'h2h', 'bookmakers': 'pinnacle,draftkings,fanduel,betfair_ex,superbet_ro,netbet_ro,mozzart'} -> 200, 3,301 B, 2.9s [X-Daily-Remaining=4981]
+   Gijon – Valladolid (start 2026-11-08T17:30:00Z):
+     pinnacle    : 3 rezultate [('Sporting Gijon', 139), ('Real Valladolid', 228), ('Draw', 225)]; prima cotă cu 143.7h înainte, ultima cu 8 min înainte de start; is_stale=0
+     betfair_ex  : ABSENT
+     superbet_ro : ABSENT
+     netbet_ro   : ABSENT
+     mozzart     : ABSENT
+
+==============================================================================
+4. NBA — superbet_ro / netbet_ro (și mozzart, betfair_ex) au player_points?
+==============================================================================
+   GET /sports/basketball_nba/odds {'markets': 'player_points', 'bookmakers': 'superbet_ro,netbet_ro,mozzart,betfair_ex'} -> 200, 2 B, 0.3s [X-Daily-Remaining=4989]
+   0 meciuri în răspuns; rezultate player_points per casă: niciuna
+   GET /coverage/markets {'sport': 'basketball_nba', 'days': 3} -> 200, 77,350 B, 3.6s [X-Daily-Remaining=4979]
+
+--- FORMA: /coverage/markets NBA (formă) ---
+{
+ "sport_key": "basketball_nba",
+ "days": 3,
+ "events": 20,
+ "bookmakers": [
+  {
+   "key": "stoiximan",
+   "title": "Stoiximan",
+   "game_lines": [
+    {
+     "market": "spreads",
+     "period": null,
+     "events": 6,
+     "markets": 6,
+     "last_update": "2026-11-10T20:21:28.337301Z"
+    },
+    {
+     "market": "totals",
+     "period": null,
+     "events": 6,
+     "markets": 6,
+     "last_update": "2026-11-10T20:21:28.337301Z"
+    },
+    "… (+1 elemente, total 3)"
+   ],
+   "props": [
+    {
+     "market": "bet_builder_boost",
+     "period": null,
+     "events": 6,
+     "markets": 49,
+     "last_update": "2026-11-10T20:21:28.337301Z"
+    },
+    {
+     "market": "player_assists",
+     "period": null,
+     "events": 6,
+     "markets": 168,
+     "last_update": "2026-11-10T20:21:28.337301Z"
+    },
+    "… (+20 elemente, total 22)"
+   ],
+   "events": 6,
+   "prop_market_count": 22
+  },
+  {
+   "key": "prizepicks",
+   "title": "PrizePicks",
+   "game_lines": [],
+   "props": [
+    {
+     "market": "player_assists",
+     "period": null,
+     "events": 6,
+     "markets": 114,
+     "last_update": "2026-11-10T20:26:01.893149Z"
+    },
+    {
+     "market": "player_blocks",
+     "period": null,
+     "events": 6,
+     "markets": 39,
+     "last_update": "2026-11-10T20:26:01.893149Z"
+    },
+    "… (+19 elemente, total 21)"
+   ],
+   "events": 6,
+   "prop_market_count": 21
+  },
+  "… (+105 elemente, total 107)"
+ ]
+}
+   superbet_ro apare în /coverage/markets NBA: True
+   netbet_ro apare în /coverage/markets NBA: True
+   mozzart apare în /coverage/markets NBA: True
+   betfair_ex apare în /coverage/markets NBA: True
+
+==============================================================================
+5. NBA player_points — numele jucătorilor între case
+==============================================================================
+   GET /sports/basketball_nba/odds {'markets': 'player_points', 'bookmakers': 'pinnacle,draftkings,fanduel'} -> 200, 1,121,689 B, 2.9s [X-Daily-Remaining=4977]
+
+--- FORMA: /odds NBA player_points (pinnacle,draftkings,fanduel) ---
+[
+ {
+  "home_team_key": "knicks",
+  "away_team_key": "bucks",
+  "home_team_id": "nba:1610612752",
+  "away_team_id": "nba:1610612749",
+  "home_team_logo_url": "https://a.espncdn.com/i/teamlogos/nba/500/ny.png",
+  "away_team_logo_url": "https://a.espncdn.com/i/teamlogos/nba/500/mil.png",
+  "id": "642879",
+  "sport_key": "basketball_nba",
+  "home_team": "New York Knicks",
+  "away_team": "Milwaukee Bucks",
+  "commence_time": "2026-11-11T00:30:00Z",
+  "live": false,
+  "is_outright": false,
+  "tournament": null,
+  "tour": null,
+  "last_update": "2026-11-10T20:25:17.592758Z",
+  "merged_from_event_ids": null,
+  "bookmakers": [
+   {
+    "key": "draftkings",
+    "title": "DraftKings",
+    "last_update": "2026-11-10T20:24:11.895050Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "player_points",
+      "description": "Jalen Brunson Points",
+      "last_update": "2026-11-10T20:24:11.895050Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "milestone",
+      "outcomes": [
+       {
+        "name": "18+ Points",
+        "description": "Jalen Brunson",
+        "price": -730,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T20:09:26.830817Z",
+        "last_seen_at": "2026-11-10T20:24:11.895050Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       },
+       {
+        "name": "20+ Points",
+        "description": "Jalen Brunson",
+        "price": -426,
+        "point": null,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T20:09:26.830817Z",
+        "last_seen_at": "2026-11-10T20:24:11.895050Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       },
+       "… (+6 elemente, total 8)"
+      ]
+     },
+     {
+      "key": "player_points",
+      "description": "Jalen Brunson Points O/U",
+      "last_update": "2026-11-10T20:24:11.895050Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Over",
+        "description": "Jalen Brunson",
+        "price": -121,
+        "point": 25.5,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T19:21:12.496409Z",
+        "last_seen_at": "2026-11-10T20:24:11.895050Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       },
+       {
+        "name": "Under",
+        "description": "Jalen Brunson",
+        "price": -105,
+        "point": 25.5,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T19:21:12.496409Z",
+        "last_seen_at": "2026-11-10T20:24:11.895050Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       }
+      ]
+     },
+     "… (+20 elemente, total 22)"
+    ]
+   },
+   {
+    "key": "fanduel",
+    "title": "FanDuel",
+    "last_update": "2026-11-10T20:25:17.592758Z",
+    "link": null,
+    "app_link": null,
+    "pregame_only": false,
+    "book_event_id": null,
+    "markets": [
+     {
+      "key": "player_points",
+      "description": "Jalen Brunson - Points",
+      "last_update": "2026-11-10T20:25:17.592758Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Over",
+        "description": "Jalen Brunson",
+        "price": -102,
+        "point": 26.5,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T20:12:17.538702Z",
+        "last_seen_at": "2026-11-10T20:25:17.592758Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       },
+       {
+        "name": "Under",
+        "description": "Jalen Brunson",
+        "price": -130,
+        "point": 26.5,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T20:12:17.538702Z",
+        "last_seen_at": "2026-11-10T20:25:17.592758Z",
+        "liquidity": null,
+        "liquidity_updated_at": null,
+        "line_gap": null,
+        "book_outcome_id": null,
+        "outcome_id": null,
+        "player_id": "nba:1628973",
+        "side": null
+       }
+      ]
+     },
+     {
+      "key": "player_points",
+      "description": "OG Anunoby - Points",
+      "last_update": "2026-11-10T20:25:17.592758Z",
+      "period": null,
+      "suspended_at": null,
+      "team": null,
+      "line_type": "main",
+      "outcomes": [
+       {
+        "name": "Over",
+        "description": "OG Anunoby",
+        "price": -110,
+        "point": 17.5,
+        "book_updated_at": null,
+        "book_version": null,
+        "payout_multiplier": null,
+        "dfs_odds_type": null,
+        "last_change_at": "2026-11-10T20:12:16.049349Z",
+        "last
+… [trunchiat la afișare; complet în phase0_out/raw]
+   6 meciuri. Jucători per meci per casă (medie):
+     pinnacle    : 12.0 jucători/meci în 6 meciuri
+     draftkings  : 14.0 jucători/meci în 6 meciuri
+     fanduel     : 13.7 jucători/meci în 6 meciuri
+   rezultate fără player_id: niciunul
+   player_id cu grafii diferite între case: 4 din 84
+     nba:1631170: [('draftkings', 'Jaime Jaquez Jr.'), ('fanduel', 'Jaime Jaquez Jr.'), ('pinnacle', 'Jaime Jaquez')]
+     nba:1641783: [('draftkings', 'Tristan da Silva'), ('fanduel', 'Tristan da Silva'), ('pinnacle', 'Tristan Da Silva')]
+     nba:1643411: [('draftkings', 'Darius Acuff Jr.'), ('fanduel', 'Darius Acuff Jr.'), ('pinnacle', 'Darius Acuff')]
+     nba:1629057: [('draftkings', 'Robert Williams'), ('fanduel', 'Robert Williams III'), ('pinnacle', 'Robert Williams')]
+   nume care diferă doar prin diacritice/punctuație/sufix: 4
+     jaime jaquez: [('draftkings', 'Jaime Jaquez Jr.'), ('fanduel', 'Jaime Jaquez Jr.'), ('pinnacle', 'Jaime Jaquez')]
+     tristan da silva: [('draftkings', 'Tristan da Silva'), ('fanduel', 'Tristan da Silva'), ('pinnacle', 'Tristan Da Silva')]
+     darius acuff: [('draftkings', 'Darius Acuff Jr.'), ('fanduel', 'Darius Acuff Jr.'), ('pinnacle', 'Darius Acuff')]
+     robert williams: [('draftkings', 'Robert Williams'), ('fanduel', 'Robert Williams III'), ('pinnacle', 'Robert Williams')]
+
+==============================================================================
+Extra. Forma /results NBA (verificat deja în SPEC, afișat pentru schemă)
+==============================================================================
+   GET /sports/basketball_nba/events/641560/results {'markets': 'player_points', 'bookmakers': 'pinnacle'} -> 200, 8,669 B, 0.3s [X-Daily-Remaining=4976]
+
+--- FORMA: /results NBA player_points pinnacle ---
+{
+ "id": "641560",
+ "sport_key": "basketball_nba",
+ "home_team": "Golden State Warriors",
+ "away_team": "New Orleans Pelicans",
+ "commence_time": "2026-11-10T03:00:00Z",
+ "live": false,
+ "status": "final",
+ "home_score": 138,
+ "away_score": 87,
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Brandin Podziemski Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Brandin Podziemski",
+       "outcome_id": 16263301199,
+       "price": -115,
+       "point": 15.5,
+       "resolution": "won",
+       "actual_value": 25.0,
+       "resolved_at": "2026-11-10T05:26:00.959989Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641764"
+      },
+      {
+       "name": "Under",
+       "description": "Brandin Podziemski",
+       "outcome_id": 16263301200,
+       "price": -115,
+       "point": 15.5,
+       "resolution": "lost",
+       "actual_value": 25.0,
+       "resolved_at": "2026-11-10T05:26:00.959989Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641764"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "De'Anthony Melton Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "De'Anthony Melton",
+       "outcome_id": 16263301201,
+       "price": 100,
+       "point": 9.5,
+       "resolution": "won",
+       "actual_value": 16.0,
+       "resolved_at": "2026-11-10T05:26:00.959989Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1629001"
+      },
+      {
+       "name": "Under",
+       "description": "De'Anthony Melton",
+       "outcome_id": 16263301202,
+       "price": -133,
+       "point": 9.5,
+       "resolution": "lost",
+       "actual_value": 16.0,
+       "resolved_at": "2026-11-10T05:26:00.959989Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1629001"
+      }
+     ]
+    },
+    "… (+12 elemente, total 14)"
+   ]
+  }
+ ],
+ "context": null,
+ "upgrade_url": null
+}
+
+==============================================================================
+REZUMAT
+==============================================================================
+   [1] DA — Pinnacle are player_points la închidere în 3/3 meciuri
+   [2] history↔closing: 28 identice / 0 diferite — vezi detalii; closing are o singură linie (`point`) per rezultat + `opening_point` separat
+   [2b] linie mutată deschidere→închidere: pinnacle 38.5%, draftkings 52.1%, fanduel 55.1%
+   [3] vezi tabelele de mai sus (per ligă și casă)
+   [4] CONFIRMAT — superbet_ro și netbet_ro nu au player_points
+   [5] 84 player_id; 4 cu grafii diferite; fără player_id: 0
+
+   Cereri făcute: 18; X-Daily-Remaining la final: 4976
+   Headere de limită văzute: {'ratelimit-policy': '5000;w=86400', 'ratelimit-limit': '5000', 'x-ratelimit-limit': '5000', 'x-daily-remaining': '4976', 'ratelimit-remaining': '4976', 'ratelimit-reset': '12819', 'x-ratelimit-remaining': '4976', 'x-ratelimit-reset': '1794355200'}
+   Răspunsuri brute: C:\Users\User\AppData\Local\Claude-Data\claude_pzs8sxrjxfjjc\scratch-workspaces\7dc620a2-9155-498b-94da-24c40e5c2c64\f32fd3be-4f3a-4695-a5ea-0387f28ad709\scratch-2026-11-10-b516e1\phase0_out\raw

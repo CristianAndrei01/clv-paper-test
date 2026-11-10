@@ -1,0 +1,35 @@
+name: tick
+
+# 56 de rulări pe zi, între 15:00 și 05:00 UTC (10:00–00:00 ora SUA de Est).
+# Minute „ciudate” (:07, :22, :37, :52): rulările programate fix la :00 sunt cele mai întârziate de GitHub.
+# Fiecare tick decide singur, din baza de date, ce snapshot-uri sunt scadente.
+on:
+  schedule:
+    - cron: "7,22,37,52 15-23 * * *"
+    - cron: "7,22,37,52 0-4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Colector
+        run: python -m clvtest tick
+        env:
+          PROPLINE_API_KEY: ${{ secrets.PROPLINE_API_KEY }}
+          DB_URL_COLLECTOR: ${{ secrets.DB_URL_COLLECTOR }}
+          ACTIVE_SPORTS: basketball_nba
