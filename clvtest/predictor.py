@@ -412,7 +412,7 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
         if not fake and result.model != cfg.model:
             raise RuntimeError(f"a răspuns alt model ({result.model}) decât cel al seriei ({cfg.model})")
         details.update(model_answered=result.model, picks_returned=len(result.picks), notes=result.notes[:2000],
-                       searches=len(set(result.search_urls)), model_text_tail=result.text[-1500:],
+                       search_result_urls=len(set(result.search_urls)), model_text_tail=result.text[-1500:],
                        raw_picks=result.picks)
 
         # 3. snapshot nou după model; pariurile se iau la cota de acum
