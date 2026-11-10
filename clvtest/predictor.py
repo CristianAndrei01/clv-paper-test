@@ -204,6 +204,12 @@ class ModelResult:
     usage: dict = field(default_factory=dict)
     search_urls: list[str] = field(default_factory=list)
     text: str = ""
+    thinking: str = ""          # rezumatul gândirii (display="summarized"), pentru audit
+
+
+# Doar vizibilitate: rezumatul gândirii nu schimbă promptul, modelul sau pragul, deci nici seria.
+THINKING = {"type": "adaptive", "display": "summarized"}
+THINKING_MAX_CHARS = 20000
 
 
 class ModelRefused(RuntimeError):
@@ -229,11 +235,12 @@ def call_model(cfg: PredictorConfig, system_prompt: str, message: str) -> ModelR
     usage: dict = {}
     urls: list[str] = []
     texts: list[str] = []
+    thoughts: list[str] = []
     nudged = False
     for _ in range(MAX_CONTINUATIONS):
         with client.messages.stream(
             model=cfg.model, max_tokens=cfg.max_tokens, system=system_prompt,
-            thinking={"type": "adaptive"}, output_config={"effort": cfg.effort},
+            thinking=THINKING, output_config={"effort": cfg.effort},
             tools=tools, messages=messages,
         ) as stream:
             resp = stream.get_final_message()
@@ -243,6 +250,8 @@ def call_model(cfg: PredictorConfig, system_prompt: str, message: str) -> ModelR
                 urls += [r.url for r in b.content if getattr(r, "url", None)]
             elif b.type == "text":
                 texts.append(b.text)
+            elif b.type == "thinking" and getattr(b, "thinking", ""):
+                thoughts.append(b.thinking)
 
         if resp.stop_reason == "refusal":
             raise ModelRefused(f"modelul a refuzat: {getattr(resp, 'stop_details', None)}")
@@ -250,7 +259,8 @@ def call_model(cfg: PredictorConfig, system_prompt: str, message: str) -> ModelR
         if call is not None:
             return ModelResult(picks=list(call.input.get("picks", [])), notes=call.input.get("notes", ""),
                                model=resp.model, stop_reason=resp.stop_reason, usage=usage,
-                               search_urls=urls, text="\n".join(texts)[-4000:])
+                               search_urls=urls, text="\n".join(texts)[-4000:],
+                               thinking="\n\n".join(thoughts)[:THINKING_MAX_CHARS])
         if resp.stop_reason == "pause_turn":
             messages.append({"role": "assistant", "content": resp.content})
             continue
@@ -412,7 +422,7 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
         if not fake and result.model != cfg.model:
             raise RuntimeError(f"a răspuns alt model ({result.model}) decât cel al seriei ({cfg.model})")
         details.update(model_answered=result.model, picks_returned=len(result.picks), notes=result.notes[:2000],
-                       search_result_urls=len(set(result.search_urls)), model_text_tail=result.text[-1500:],
+                       search_result_urls=len(set(result.search_urls)), model_text_tail=result.text[-1500:], thinking_summary=result.thinking,
                        raw_picks=result.picks)
 
         # 3. snapshot nou după model; pariurile se iau la cota de acum
@@ -452,7 +462,7 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
             pconn.commit()
         _finish(pconn, run_id, "ok", api, usage, details)
         print(f"predictor run {run_id}: {len(recorded)} perechi înregistrate{' (dry-run, rollback)' if dry_run else ''}")
-        print(db.dumps({k: v for k, v in details.items() if k not in ('model_text_tail', 'raw_picks')}))
+        print(db.dumps({k: v for k, v in details.items() if k not in ('model_text_tail', 'raw_picks', 'thinking_summary')}))
         return 0
     except Exception as e:  # noqa: BLE001
         pconn.rollback()
