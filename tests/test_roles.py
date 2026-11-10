@@ -43,8 +43,15 @@ def test_predictor_sees_only_future_through_views():
     with conn("predictor") as c:
         n_past = c.execute("select count(*) from clv.predictor_events where commence_time <= now()").fetchone()[0]
         assert n_past == 0
-        c.execute("select 1 from clv.predictor_odds limit 1")
+        kinds = {r[0] for r in c.execute("select distinct snapshot_kind from clv.predictor_odds").fetchall()}
+        assert "closing" not in kinds
         c.execute("select 1 from clv.predictions limit 1")
+
+
+def test_predictor_sees_only_its_own_runs():
+    with conn("predictor") as c:
+        assert c.execute("select count(*) from clv.predictor_runs").fetchone()[0] >= 0
+        assert "component" not in [d.name for d in c.execute("select * from clv.predictor_runs limit 0").description]
 
 
 @pytest.mark.parametrize("sql", [

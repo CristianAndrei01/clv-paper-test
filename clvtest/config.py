@@ -21,6 +21,10 @@ class SportConfig:
     lookahead_hours: float | None = None
     # Snapshot-ul unic de dinainte de start: între (min, max) minute până la start.
     prestart_min: tuple[int, int] = (15, 30)
+    # Predictor (SPEC §4.2): fereastra în ore înainte de primul meci al zilei, limita zilnică, promptul.
+    predictor_hours_before: tuple[float, float] = (2.0, 3.0)
+    daily_cap: int = 10
+    prompt_file: str | None = None
 
 
 SPORTS: dict[str, SportConfig] = {
@@ -31,6 +35,9 @@ SPORTS: dict[str, SportConfig] = {
         periodic_every_min=120,
         game_day_tz="America/New_York",
         prestart_min=(15, 30),
+        predictor_hours_before=(2.0, 3.0),
+        daily_cap=10,
+        prompt_file="prompts/nba-v1.md",
     ),
     # Fotbal: doar Pinnacle (decizia 1). Inactiv până când NBA rulează curat 3 zile (decizia 2).
     "soccer_italy_serie_b": SportConfig(
@@ -70,6 +77,25 @@ def active_sports() -> list[SportConfig]:
     if unknown:
         raise SystemExit(f"ACTIVE_SPORTS conține sporturi necunoscute: {unknown}")
     return [SPORTS[k] for k in keys]
+
+
+@dataclass(frozen=True)
+class PredictorConfig:
+    """Tot ce definește o serie (SPEC §5): orice schimbare aici = serie nouă."""
+    model: str
+    effort: str
+    edge_threshold: float
+    max_searches: int
+    max_tokens: int = 64000
+
+    @classmethod
+    def from_env(cls) -> "PredictorConfig":
+        return cls(
+            model=os.environ.get("PREDICTOR_MODEL", "claude-opus-5-5"),
+            effort=os.environ.get("PREDICTOR_EFFORT", "high"),
+            edge_threshold=float(os.environ.get("EDGE_THRESHOLD", "0.03")),
+            max_searches=int(os.environ.get("PREDICTOR_MAX_SEARCHES", "30")),
+        )
 
 
 def require(name: str) -> str:

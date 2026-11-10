@@ -63,6 +63,14 @@ def _store_odds(conn, run_id, sport: SportConfig, kind: str, resp, events: list[
     return n, warnings
 
 
+def store_odds_snapshot(conn, api: PropLine, run_id: int, sport: SportConfig, kind: str) -> int:
+    """Un snapshot complet al cotelor pentru sport (folosit și de predictor, cu kind='predictor')."""
+    params = {"markets": sport.markets, "bookmakers": ",".join(sport.bookmakers)}
+    r = api.get(f"/sports/{sport.key}/odds", params)
+    n, _ = _store_odds(conn, run_id, sport, kind, r, r.data)
+    return n
+
+
 def collect_sport(conn, api: PropLine, run_id: int, sport: SportConfig) -> dict:
     d: dict = {"warnings": []}
     params = {"markets": sport.markets, "bookmakers": ",".join(sport.bookmakers)}
