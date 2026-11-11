@@ -1,0 +1,441 @@
+{
+ "id": "646677",
+ "sport_key": "basketball_nba",
+ "home_team": "Sacramento Kings",
+ "away_team": "Orlando Magic",
+ "commence_time": "2026-11-11T03:00:00Z",
+ "live": false,
+ "status": "final",
+ "home_score": 100,
+ "away_score": 107,
+ "bookmakers": [
+  {
+   "key": "draftkings",
+   "title": "DraftKings",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Anthony Black Points O/U",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Anthony Black",
+       "outcome_id": 16263981484,
+       "price": -130,
+       "point": 25.5,
+       "resolution": "won",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      },
+      {
+       "name": "Under",
+       "description": "Anthony Black",
+       "outcome_id": 16263981485,
+       "price": 100,
+       "point": 25.5,
+       "resolution": "lost",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Jase Richardson Points O/U",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Jase Richardson",
+       "outcome_id": 16263981525,
+       "price": -135,
+       "point": 7.5,
+       "resolution": "lost",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      },
+      {
+       "name": "Under",
+       "description": "Jase Richardson",
+       "outcome_id": 16263981526,
+       "price": 105,
+       "point": 7.5,
+       "resolution": "won",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Tristan da Silva Points O/U",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Tristan da Silva",
+       "outcome_id": 16263981537,
+       "price": -106,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      },
+      {
+       "name": "Under",
+       "description": "Tristan da Silva",
+       "outcome_id": 16263981538,
+       "price": -120,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Domantas Sabonis Points O/U",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16263994118,
+       "price": -110,
+       "point": 3.5,
+       "resolution": "lost",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      },
+      {
+       "name": "Under",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16263994119,
+       "price": -120,
+       "point": 3.5,
+       "resolution": "won",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "fanduel",
+   "title": "FanDuel",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Anthony Black - Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Anthony Black",
+       "outcome_id": 16263936966,
+       "price": 162,
+       "point": 26.5,
+       "resolution": "lost",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      },
+      {
+       "name": "Under",
+       "description": "Anthony Black",
+       "outcome_id": 16263936967,
+       "price": -220,
+       "point": 26.5,
+       "resolution": "won",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Domantas Sabonis - Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16263936972,
+       "price": -162,
+       "point": 1.5,
+       "resolution": "lost",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      },
+      {
+       "name": "Under",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16263936973,
+       "price": 122,
+       "point": 1.5,
+       "resolution": "won",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Jase Richardson - Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Jase Richardson",
+       "outcome_id": 16263936976,
+       "price": -102,
+       "point": 6.5,
+       "resolution": "lost",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      },
+      {
+       "name": "Under",
+       "description": "Jase Richardson",
+       "outcome_id": 16263936977,
+       "price": -130,
+       "point": 6.5,
+       "resolution": "won",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Tristan da Silva - Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Tristan da Silva",
+       "outcome_id": 16263940160,
+       "price": -106,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      },
+      {
+       "name": "Under",
+       "description": "Tristan da Silva",
+       "outcome_id": 16263940161,
+       "price": -120,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "player_points",
+     "description": "Anthony Black Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Anthony Black",
+       "outcome_id": 16264313893,
+       "price": -113,
+       "point": 16.5,
+       "resolution": "won",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      },
+      {
+       "name": "Under",
+       "description": "Anthony Black",
+       "outcome_id": 16264313894,
+       "price": -117,
+       "point": 16.5,
+       "resolution": "lost",
+       "actual_value": 26.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641710"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Domantas Sabonis Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16264313901,
+       "price": -132,
+       "point": 13.5,
+       "resolution": "lost",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      },
+      {
+       "name": "Under",
+       "description": "Domantas Sabonis",
+       "outcome_id": 16264313902,
+       "price": -100,
+       "point": 13.5,
+       "resolution": "won",
+       "actual_value": 0.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1627734"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Jase Richardson Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Jase Richardson",
+       "outcome_id": 16264313907,
+       "price": -128,
+       "point": 8.5,
+       "resolution": "lost",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      },
+      {
+       "name": "Under",
+       "description": "Jase Richardson",
+       "outcome_id": 16264313908,
+       "price": -103,
+       "point": 8.5,
+       "resolution": "won",
+       "actual_value": 6.0,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1642859"
+      }
+     ]
+    },
+    {
+     "key": "player_points",
+     "description": "Tristan Da Silva Total Points",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Over",
+       "description": "Tristan Da Silva",
+       "outcome_id": 16264313913,
+       "price": -117,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      },
+      {
+       "name": "Under",
+       "description": "Tristan Da Silva",
+       "outcome_id": 16264313914,
+       "price": -113,
+       "point": 13.5,
+       "resolution": "void",
+       "actual_value": null,
+       "resolved_at": "2026-11-11T05:29:14.271988Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": "nba:1641783"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "context": null,
+ "upgrade_url": null
+}

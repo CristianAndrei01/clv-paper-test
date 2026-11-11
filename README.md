@@ -6,7 +6,7 @@ Nu se pariază bani.
 ## Structură
 
 - `sql/` — schema (`001`), regulile de integritate (`002`), rolurile (`003`), teste SQL (`sql/tests/`)
-- `clvtest/` — colectorul (Faza 1) și predictorul (Faza 2); decontarea vine în Faza 3
+- `clvtest/` — colectorul (Faza 1), predictorul (Faza 2), decontarea și raportul (Faza 3)
 - `prompts/` — prompturile versionate; `prompt_version` = nume + primele 12 caractere din sha256-ul fișierului,
   deci orice modificare a textului deschide automat o serie nouă
 - `.github/workflows/tick.yml` — rularea programată (60 de tick-uri pe zi, 14:00–05:00 UTC)
@@ -45,6 +45,29 @@ O rulare pe zi de NBA, cu 2–3 ore înainte de primul meci (ziua după ora SUA 
 
 Predictorul rulează în GitHub Actions doar dacă secretul `ANTHROPIC_API_KEY` există.
 
+## Decontare și raport (Faza 3)
+
+```
+.venv/Scripts/python -m clvtest settle --force --dry-run   # decontează acum, apoi ROLLBACK
+.venv/Scripts/python -m clvtest report
+```
+
+Decontarea rulează o dată pe zi, la primul tick de după 14:00 UTC, pentru meciurile începute cu > 4 ore în urmă:
+
+1. salvează `/odds/closing` și `/results` (Pinnacle, DraftKings, FanDuel), integral și ca rânduri `closing`;
+2. reper: Pinnacle, dacă a fost văzută cu ≤ 30 de minute înainte de start; altfel media fără marjă
+   DraftKings + FanDuel (`us_consensus`), cu aceeași regulă;
+3. linia de închidere = linia luată → `clv = cota_luată × p_închidere_fără_marjă − 1`; altfel `line_moved`
+   și `line_delta` cu semn (pozitiv = în favoarea pariului). La consens, linia consensului e media liniilor
+   caselor; dacă diferă de linia luată, pariul e cu linie mutată;
+4. rezultatul se calculează din valoarea reală a statisticii, la linia noastră; jucătorul care n-a intrat pe
+   teren (`void` la toate casele) => pariu anulat: fără CLV, profit 0, nu se numără la țintă; perechea lui rămâne;
+5. un pariu fără rezultat încă, sau fără nicio cotă de închidere utilizabilă, rămâne nedecontat și apare în
+   `runs.details` la `pending`.
+
+Raportul e separat pe serii; verdictul se ia pe total, cu cifra doar-Pinnacle alături, și e marcat
+provizoriu până la ținta de pariuri (300 NBA).
+
 ## Integritate
 
 - `clv.predictions` și `clv.series`: doar adăugare (trigger care blochează UPDATE/DELETE/TRUNCATE).
@@ -52,6 +75,8 @@ Predictorul rulează în GitHub Actions doar dacă secretul `ANTHROPIC_API_KEY` 
 - O predicție e respinsă dacă meciul începe în < 5 minute, dacă avantajul e sub pragul seriei, sau dacă nu
   corespunde exact unui snapshot salvat. Prețul, `last_seen_at` și `is_stale` se iau din snapshot; cota trebuie
   să fi fost văzută în ultimele 15 minute și să nu fie `is_stale`.
+- `clv.settlements`: regulile de consistență sunt constrângeri în baza de date (`sql/006_settlement.sql`):
+  pariu anulat => fără CLV; linie mutată => fără CLV pe cotă și cu `line_delta ≠ 0`; altfel CLV obligatoriu.
 - Verificarea lanțului: `select * from clv.verify_prediction_chain();`
 - Teste: `sql/tests/integrity_tests.sql` (rulează și face rollback; rezultatul așteptat e eroarea
   `INTEGRITY_TESTS_PASSED`).
