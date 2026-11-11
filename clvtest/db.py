@@ -108,6 +108,35 @@ def endpoints_fetched(conn: psycopg.Connection, kind: str, endpoints: list[str])
     return {r[0] for r in rows}
 
 
+def missed_prestarts(conn: psycopg.Connection, sport_key: str) -> list[dict]:
+    """Meciuri începute în ultimele 24 de ore fără snapshot de dinainte de start, încă nenotate în `runs`.
+
+    Pentru fiecare: ultima rulare a colectorului dinainte de start și cu câte minute înainte a fost,
+    ca ratarea să poată fi pusă pe seama întârzierilor programării.
+    """
+    rows = conn.execute(
+        """select e.id, e.commence_time,
+                  (select max(r.started_at) from clv.runs r
+                    where r.component = 'collector' and r.started_at < e.commence_time) as last_tick
+           from clv.events e
+           where e.sport_key = %s
+             and e.commence_time <= clock_timestamp()
+             and e.commence_time > clock_timestamp() - interval '24 hours'
+             and not exists (select 1 from clv.raw_responses r
+                             where r.kind = 'prestart'
+                               and r.endpoint = '/sports/' || e.sport_key || '/events/' || e.id || '/odds')
+             and not exists (select 1 from clv.runs r,
+                                    jsonb_array_elements(coalesce(r.details->'sports'->e.sport_key->'prestart_missed', '[]'::jsonb)) x
+                             where r.component = 'collector' and x->>'event_id' = e.id)
+           order by e.commence_time""",
+        (sport_key,),
+    ).fetchall()
+    return [{"event_id": eid, "commence_time": ct.isoformat(),
+             "last_tick_before_start": lt.isoformat() if lt else None,
+             "last_tick_minutes_before": round((ct - lt).total_seconds() / 60, 1) if lt else None}
+            for eid, ct, lt in rows]
+
+
 def upcoming_events(conn: psycopg.Connection, sport_key: str, hours: float) -> list[tuple]:
     return conn.execute(
         """select id, commence_time from clv.events

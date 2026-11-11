@@ -118,6 +118,12 @@ def collect_sport(conn, api: PropLine, run_id: int, sport: SportConfig) -> dict:
         d["warnings"] += w
         d["prestart"].append({"event_id": eid, "minutes_to_start": minutes, "rows": rows})
 
+    # 4. snapshot-uri de dinainte de start ratate (de obicei întârzieri ale cron-ului GitHub):
+    #    fereastra rămâne 15–30 de minute, dar fiecare ratare se notează o singură dată, aici.
+    missed = db.missed_prestarts(conn, sport.key)
+    if missed:
+        d["prestart_missed"] = missed
+
     d["warnings"] = d["warnings"][:30]
     return d
 
