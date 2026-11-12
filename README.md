@@ -45,10 +45,10 @@ O rulare pe zi de NBA, cu 2–3 ore înainte de primul meci (ziua după ora SUA 
 
 Predictorul rulează în GitHub Actions doar dacă secretul `ANTHROPIC_API_KEY` există.
 
-## Fotbal (Serie B + Segunda, 1X2) — construit, inactiv
+## Fotbal (Serie B + Segunda, 1X2)
 
-Același pipeline, altă configurație (`clvtest/config.py`); doar Pinnacle. Se activează adăugând ligile în
-`ACTIVE_SPORTS` din `.github/workflows/tick.yml`, după 3 zile curate de NBA.
+Același pipeline, altă configurație (`clvtest/config.py`); doar Pinnacle. Activ din 12 noiembrie 2026
+(`ACTIVE_SPORTS` din `.github/workflows/tick.yml`).
 
 - Colector: un snapshot la 12 ore în ultimele 72 de ore înainte de meci și unul cu 30–60 de minute înainte de start.
   Partea 1/X/2 se ia din câmpul `side` al API-ului, pentru că numele echipelor din cote diferă de cele ale meciului

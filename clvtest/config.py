@@ -47,7 +47,7 @@ SPORTS: dict[str, SportConfig] = {
         daily_cap=10,
         prompt_file="prompts/nba-v1.md",
     ),
-    # Fotbal: doar Pinnacle (decizia 1). Inactiv (ACTIVE_SPORTS) până când NBA rulează curat 3 zile (decizia 2).
+    # Fotbal: doar Pinnacle (decizia 1). Activ din 12 nov. 2026 (ACTIVE_SPORTS în tick.yml).
     "soccer_italy_serie_b": SportConfig(
         key="soccer_italy_serie_b",
         markets="h2h",

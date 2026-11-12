@@ -21,7 +21,7 @@ permissions:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 30        # o rulare cu predictor (căutare web) poate dura 5–15 minute
+    timeout-minutes: 60        # predictorul NBA și cel de fotbal pot cădea în același tick (5–15 minute fiecare)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,7 +38,7 @@ jobs:
           DB_URL_SETTLER: ${{ secrets.DB_URL_SETTLER }}
           # Predictorul rulează doar dacă secretul ANTHROPIC_API_KEY există.
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ACTIVE_SPORTS: basketball_nba
+          ACTIVE_SPORTS: basketball_nba,soccer_italy_serie_b,soccer_spain_segunda_division
           PREDICTOR_MODEL: claude-opus-5-5
           PREDICTOR_EFFORT: high
           EDGE_THRESHOLD: "0.03"
