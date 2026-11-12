@@ -59,7 +59,9 @@ Același pipeline, altă configurație (`clvtest/config.py`); doar Pinnacle. Act
   întâmplare dintre rezultatele 1/X/2 ale acelorași meciuri.
 - Decontare: închiderea Pinnacle (văzută cu ≤ 30 de minute înainte de start), devig pe trei rezultate; fără consens
   și fără linii mutate. Rezultatul: rezolvarea Pinnacle pe timpul regulamentar (fără piața de la pauză), verificată
-  cu scorul; dacă nu se potrivesc, pariul rămâne nedecontat. Meciurile amânate sau „expired” rămân nedecontate.
+  cu scorul; dacă nu se potrivesc, pariul rămâne nedecontat. Un meci fără rezultat (amânat, „expired”) la 72 de ore
+  după ora de start din momentul pariului se anulează: fără CLV, profit 0, nu se numără la țintă. Un meci jucat, dar
+  fără închidere Pinnacle utilizabilă, rămâne nedecontat.
 - Raport: seriile rămân separate pe ligă, plus un bloc „FOTBAL ÎMPREUNĂ” cu ținta de 60 (SPEC §2).
 
 ## Decontare și raport (Faza 3)

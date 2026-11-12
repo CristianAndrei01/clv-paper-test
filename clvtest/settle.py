@@ -14,7 +14,8 @@ Pentru fiecare meci cu pariuri nedecontate:
   5. profit fictiv la miza de 100 lei.
 
 Fotbal (h2h): doar Pinnacle, devig pe 1/X/2, fără consens și fără linii mutate; rezultatul Pinnacle pe timpul
-regulamentar, verificat cu scorul (vezi `result_h2h`).
+regulamentar, verificat cu scorul (vezi `result_h2h`). Un meci fără rezultat (amânat, „expired”) la 72 de ore
+după ora de start de la momentul pariului se anulează (decizie 12 nov.): fără CLV, profit 0, nu intră la țintă.
 
 Rulează cu rolul `clv_settler`.
 """
@@ -42,6 +43,7 @@ CLOSING_MAX_GAP_MIN = 30          # ultima vedere a cotei, față de start (deci
 SETTLE_AFTER_START_H = 4          # un meci NBA se termină în ~2,5 ore; lăsăm marjă pentru rezultate
 SETTLE_EVERY_H = 20               # „rulează zilnic”: o încercare pe zi
 SETTLE_UTC_HOURS = (14, 20)       # ... la primul tick de după 14:00 UTC (după pauza de dimineață a programării)
+UNPLAYED_VOID_H = 72              # fotbal: fără rezultat la 3 zile după ora de start inițială => anulat
 
 
 # ---------------------------------------------------------------- potrivirea jucătorilor
@@ -268,17 +270,34 @@ def profit(result: str, price_decimal: Decimal, stake: Decimal) -> Decimal:
 # ---------------------------------------------------------------- bază de date
 PENDING_SQL = """
     select p.id, p.event_id, p.player_id, p.player_name, p.side, p.line, p.price_decimal, p.stake,
-           p.is_control, e.commence_time, e.status
+           p.is_control, e.commence_time, e.status,
+           p.created_at + make_interval(secs => p.hours_to_start * 3600) as original_start
     from clv.predictions p
     join clv.events e on e.id = p.event_id
     left join clv.settlements s on s.prediction_id = p.id
-    where s.id is null and p.sport_key = %s
-      and e.commence_time < clock_timestamp() - make_interval(hours => %s)
+    where s.id is null and p.sport_key = %(sport)s
+      -- ora de start de acum, sau cea de la momentul pariului (un meci amânat își mută `commence_time`)
+      and least(e.commence_time, p.created_at + make_interval(secs => p.hours_to_start * 3600))
+          < clock_timestamp() - make_interval(hours => %(after)s)
     order by e.commence_time, p.id"""
 
 
 def pending(conn, sport_key: str) -> list[tuple]:
-    return conn.execute(PENDING_SQL, (sport_key, SETTLE_AFTER_START_H)).fetchall()
+    return conn.execute(PENDING_SQL, {"sport": sport_key, "after": SETTLE_AFTER_START_H}).fetchall()
+
+
+def unplayed_void_due(original_start: datetime, now: datetime) -> bool:
+    return now - original_start >= timedelta(hours=UNPLAYED_VOID_H)
+
+
+def void_unplayed(pred: tuple, status: str | None, commence_now: datetime, books: list) -> tuple:
+    """Fotbal: meci fără rezultat la 72 de ore după ora de start inițială => pariu anulat."""
+    original_start = pred[11]
+    b = Benchmark("none", None, None, None, None, None, False, None, None, books)
+    details = {"books": books, "status": status, "original_start": original_start.isoformat(),
+               "commence_time_now": commence_now.isoformat() if commence_now else None,
+               "reason": f"meci fără rezultat la {UNPLAYED_VOID_H} de ore după ora de start inițială"}
+    return b, "void", None, Decimal("0.00"), details
 
 
 def known_player_names(conn, event_id: str) -> dict[tuple[str, str], str]:
@@ -329,7 +348,7 @@ def insert_settlement(conn, run_id: int, pred_id: int, b: Benchmark, result: str
 
 def decide(pred: tuple, quotes: list[Quote], results: dict) -> tuple[Benchmark, str, float | None, Decimal, dict] | None:
     """O predicție -> decontare, sau None dacă rezultatul nu e încă disponibil."""
-    pid, _eid, player_id, _name, side, line, price_dec, stake, _ctrl, commence, _status = pred
+    pid, _eid, player_id, _name, side, line, price_dec, stake, _ctrl, commence, _status, *_ = pred
     line = float(line)
     res, actual, info = result_for(side, line, player_id, results)
     if res is None:
@@ -455,7 +474,7 @@ def result_h2h(side: str, results: dict, quotes: list[Quote]) -> tuple[str | Non
 
 
 def decide_h2h(pred: tuple, quotes: list[Quote], results: dict):
-    pid, _eid, _player, _name, side, _line, price_dec, stake, _ctrl, commence, _status = pred
+    pid, _eid, _player, _name, side, _line, price_dec, stake, _ctrl, commence, _status, *_ = pred
     res, actual, info = result_h2h(side, results, quotes)
     if res is None:
         return None
@@ -466,6 +485,16 @@ def decide_h2h(pred: tuple, quotes: list[Quote], results: dict):
     elif b.benchmark == "none":
         return None
     return b, res, actual, profit(res, price_dec, stake), {"books": b.books, **info}
+
+
+def decide_h2h_or_void(pred: tuple, quotes: list[Quote], results: dict, status: str | None, now: datetime):
+    """decide_h2h, iar dacă meciul tot n-are rezultat la 72 de ore după ora de start inițială => anulat.
+    Un meci jucat, dar fără închidere Pinnacle utilizabilă, rămâne nedecontat (nu se anulează)."""
+    out = decide_h2h(pred, quotes, results)
+    if out is None and unplayed_void_due(pred[11], now) and result_h2h(pred[4], results, quotes)[0] is None:
+        pin = h2h_close(quotes, PINNACLE, pred[9])
+        out = void_unplayed(pred, results.get("status") or status, pred[9], [pin.summary()] if pin else [])
+    return out
 
 
 def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: bool = False) -> dict:
@@ -482,9 +511,12 @@ def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: 
         by_event.setdefault(p[1], []).append(p)
     h2h = sport.markets == "h2h"
     params = {"markets": sport.markets, "bookmakers": ",".join(b for b in BOOKS if b in sport.bookmakers)}
+    now = db.db_now(conn)
     for eid, ps in by_event.items():
         status = ps[0][10]
-        if status != "final":
+        # fotbal: la 72 de ore de la ora de start inițială întrebăm oricum /results (poate starea nu s-a actualizat)
+        void_due = h2h and all(unplayed_void_due(p[11], now) for p in ps)
+        if status != "final" and not void_due:
             d["pending"] += [{"prediction_id": p[0], "event_id": eid, "reason": f"meci în starea {status!r}"} for p in ps]
             continue
         c = api.get(f"/sports/{sport.key}/events/{eid}/odds/closing", params)
@@ -498,7 +530,7 @@ def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: 
         d["warnings"] += w
         save_closing(conn, run_id, raw_c, eid, sport.markets, quotes)
         for p in ps:
-            out = decide_h2h(p, quotes, r.data) if h2h else decide(p, quotes, r.data)
+            out = decide_h2h_or_void(p, quotes, r.data, status, now) if h2h else decide(p, quotes, r.data)
             if out is None:
                 d["pending"].append({"prediction_id": p[0], "event_id": eid, "reason": "fără rezultat sau fără cotă de închidere"})
                 continue

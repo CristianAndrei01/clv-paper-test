@@ -20,7 +20,9 @@ from clvtest.predictor import (
     round_key, select_picks, series_id, user_message_h2h,
 )
 from clvtest.report import Bet, render
-from clvtest.settle import benchmark_h2h, decide_h2h, h2h_close, parse_closing_h2h, result_h2h
+from clvtest.settle import (
+    benchmark_h2h, decide_h2h, decide_h2h_or_void, h2h_close, parse_closing_h2h, result_h2h, unplayed_void_due,
+)
 
 FIX = Path(__file__).parent / "fixtures"
 SEG = SPORTS["soccer_spain_segunda_division"]
@@ -173,8 +175,9 @@ def test_soccer_series_and_nba_series_unchanged():
 
 
 # ---------------------------------------------------------------- decontare
-def pred(side, price, commence, ctrl=False):
-    return (1, "e", None, None, side, None, Decimal(price), Decimal("100"), ctrl, commence, "final")
+def pred(side, price, commence, ctrl=False, original_start=None):
+    return (1, "e", None, None, side, None, Decimal(price), Decimal("100"), ctrl, commence, "final",
+            original_start or commence)
 
 
 def test_closing_h2h_parsed_with_sides_and_fresh():
@@ -223,11 +226,53 @@ def test_h2h_result_disagreeing_with_score_stays_pending():
     assert res is None and "nu se potrivește" in info["reason"]
 
 
-def test_postponed_or_expired_match_stays_pending():
+def test_postponed_or_expired_match_stays_pending_before_72h():
     quotes, _ = parse_closing_h2h(CLOSE_LP)
     expired = {**RES_LP, "status": "expired", "home_score": None, "away_score": None, "bookmakers": []}
     assert result_h2h("1", expired, quotes)[0] is None
     assert decide_h2h(pred("1", "2.2", ts(CLOSE_LP["commence_time"])), quotes, expired) is None
+
+
+def test_unplayed_match_voided_after_72h():
+    """Decizie 12 nov.: meci fără rezultat (amânat, „expired”) => anulat la 72 de ore după ora de start inițială."""
+    quotes, _ = parse_closing_h2h(CLOSE_LP)
+    commence = ts(CLOSE_LP["commence_time"])
+    expired = {**RES_LP, "status": "expired", "home_score": None, "away_score": None, "bookmakers": []}
+    p = pred("1", "2.2", commence)
+    assert decide_h2h_or_void(p, quotes, expired, "expired", commence + timedelta(hours=71, minutes=59)) is None
+    b, res, actual, prof, details = decide_h2h_or_void(p, quotes, expired, "expired", commence + timedelta(hours=72))
+    assert (res, prof, b.clv, b.line_moved, b.line_delta, b.benchmark) == ("void", Decimal("0.00"), None, False, None, "none")
+    assert details["status"] == "expired" and "72 de ore" in details["reason"]
+
+
+def test_rescheduled_match_counts_from_original_start():
+    """Meciul amânat își mută `commence_time`; termenul de 72 de ore curge de la ora din momentul pariului."""
+    quotes, _ = parse_closing_h2h(CLOSE_LP)
+    original = ts(CLOSE_LP["commence_time"])
+    moved = original + timedelta(days=10)
+    postponed = {**RES_LP, "status": "postponed", "home_score": None, "away_score": None, "bookmakers": []}
+    p = pred("1", "2.2", moved, original_start=original)
+    out = decide_h2h_or_void(p, quotes, postponed, "postponed", original + timedelta(hours=80))
+    assert out is not None and out[1] == "void" and out[4]["commence_time_now"] == moved.isoformat()
+    assert unplayed_void_due(original, original + timedelta(hours=72))
+    assert not unplayed_void_due(original, original + timedelta(hours=71))
+
+
+def test_played_match_without_usable_close_is_not_voided():
+    """Doar meciurile fără rezultat se anulează; un meci jucat, cu închidere Pinnacle veche, rămâne nedecontat."""
+    stale = copy.deepcopy(CLOSE_LP)
+    for o in stale["bookmakers"][0]["markets"][0]["outcomes"]:
+        o["closing_last_seen_at"] = "2026-11-09T18:30:00Z"
+    quotes, _ = parse_closing_h2h(stale)
+    commence = ts(CLOSE_LP["commence_time"])
+    assert decide_h2h_or_void(pred("1", "2.2", commence), quotes, RES_LP, "final", commence + timedelta(days=5)) is None
+
+
+def test_played_match_settles_normally_after_72h():
+    quotes, _ = parse_closing_h2h(CLOSE_VC)
+    commence = ts(CLOSE_VC["commence_time"])
+    out = decide_h2h_or_void(pred("2", "2.30000", commence), quotes, RES_VC, "final", commence + timedelta(days=5))
+    assert (out[0].benchmark, out[1], out[3]) == ("pinnacle", "won", Decimal("130.00"))
 
 
 def test_void_match():
