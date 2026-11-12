@@ -13,6 +13,9 @@ Pentru fiecare meci cu pariuri nedecontate:
      (decizie după Faza 2: se anulează doar pariul, perechea lui rămâne);
   5. profit fictiv la miza de 100 lei.
 
+Fotbal (h2h): doar Pinnacle, devig pe 1/X/2, fără consens și fără linii mutate; rezultatul Pinnacle pe timpul
+regulamentar, verificat cu scorul (vezi `result_h2h`).
+
 Rulează cu rolul `clv_settler`.
 """
 from __future__ import annotations
@@ -29,7 +32,7 @@ from psycopg.types.json import Jsonb
 from . import db
 from .config import SportConfig, require
 from .devig import no_vig_multiplicative
-from .odds import american_to_decimal, side_of, ts
+from .odds import american_to_decimal, h2h_sides, side_of, ts
 from .propline import PropLine
 
 PINNACLE = "pinnacle"
@@ -343,6 +346,128 @@ def decide(pred: tuple, quotes: list[Quote], results: dict) -> tuple[Benchmark, 
     return b, res, actual, profit(res, price_dec, stake), details
 
 
+# ---------------------------------------------------------------- fotbal: h2h (1X2), doar Pinnacle (decizia 1)
+H2H = ("1", "X", "2")
+
+
+def parse_closing_h2h(closing: dict, books: tuple[str, ...] = (PINNACLE,)) -> tuple[list[Quote], list[str]]:
+    """/odds/closing h2h -> cote 1/X/2. Răspunsul nu dă partea, doar numele casei pentru echipe
+    („Las Palmas” pentru „UD Las Palmas”): partea se deduce din nume; dacă nu e sigură, piața se sare."""
+    home, away = closing.get("home_team", ""), closing.get("away_team", "")
+    quotes, warnings = [], []
+    for b in closing.get("bookmakers") or []:
+        book = b.get("key")
+        if book not in books:
+            continue
+        for m in b.get("markets") or []:
+            if m.get("key") != "h2h" or m.get("period") or (m.get("line_type") or "main") != "main":
+                continue
+            outs = m.get("outcomes") or []
+            sides = h2h_sides([o.get("name", "") for o in outs], home, away)
+            if sides is None:
+                warnings.append(f"{book}: echipe nepotrivite {[o.get('name') for o in outs]} pentru {home!r} - {away!r}")
+                continue
+            for o in outs:
+                quotes.append(Quote(
+                    book=book, player_id=None, player_name=None, side=sides[o.get("name", "")], line=None,
+                    price_american=o.get("price"), price_decimal=american_to_decimal(o.get("price")),
+                    outcome_id=o.get("outcome_id"), closing_at=ts(o.get("closing_at")),
+                    closing_last_seen_at=ts(o.get("closing_last_seen_at")), is_stale=bool(o.get("is_stale")),
+                    opening_price_american=o.get("opening_price"), opening_line=None, opening_at=ts(o.get("opening_at")),
+                ))
+    return quotes, warnings
+
+
+@dataclass(frozen=True)
+class H2HClose:
+    book: str
+    quotes: dict[str, Quote]
+    probs: dict[str, float]
+    gap_min: float | None
+    fresh: bool
+
+    def summary(self) -> dict:
+        closing = [q.closing_at for q in self.quotes.values() if q.closing_at]
+        return {"book": self.book, "prices": {s: self.quotes[s].price_american for s in H2H},
+                "p": {s: round(self.probs[s], 6) for s in H2H}, "last_seen_min_before_start": self.gap_min,
+                "is_stale": any(q.is_stale for q in self.quotes.values()), "fresh": self.fresh,
+                "closing_at": max(closing).isoformat() if closing else None}
+
+
+def h2h_close(quotes: list[Quote], book: str, commence: datetime) -> H2HClose | None:
+    qs = {q.side: q for q in quotes if q.book == book and q.side in H2H and q.price_decimal is not None}
+    if not all(s in qs for s in H2H):
+        return None
+    probs = dict(zip(H2H, no_vig_multiplicative([qs[s].price_decimal for s in H2H])))
+    seen = [qs[s].closing_last_seen_at for s in H2H if qs[s].closing_last_seen_at is not None]
+    gap = round((commence - min(seen)).total_seconds() / 60, 1) if len(seen) == 3 else None
+    return H2HClose(book, {s: qs[s] for s in H2H}, probs, gap, gap is not None and gap <= CLOSING_MAX_GAP_MIN)
+
+
+def benchmark_h2h(side: str, taken_price: Decimal, quotes: list[Quote], commence: datetime) -> Benchmark:
+    """Fotbal: doar Pinnacle, cu aceeași regulă de 30 de minute; fără consens și fără linii mutate."""
+    pin = h2h_close(quotes, PINNACLE, commence)
+    seen = [pin.summary()] if pin else []
+    if pin is None or not pin.fresh:
+        return Benchmark("none", None, None, None, None, None, False, None, None, seen)
+    q, p = pin.quotes[side], pin.probs[side]
+    return Benchmark("pinnacle", None, q.price_american, q.price_decimal, round(p, 6), q.closing_at,
+                     False, None, round(float(taken_price) * p - 1, 6), seen)
+
+
+def result_h2h(side: str, results: dict, quotes: list[Quote]) -> tuple[str | None, float | None, dict]:
+    """Rezultatul 1X2 (timp regulamentar): rezolvarea Pinnacle, verificată cu scorul din același răspuns."""
+    hs, as_ = results.get("home_score"), results.get("away_score")
+    score_side = None
+    if results.get("status") == "final" and hs is not None and as_ is not None:
+        score_side = "1" if hs > as_ else "2" if as_ > hs else "X"
+    info: dict = {"score": [hs, as_], "status": results.get("status")}
+
+    by_id = {q.outcome_id: q.side for q in quotes if q.book == PINNACLE and q.outcome_id is not None}
+    pin = []
+    home, away = results.get("home_team", ""), results.get("away_team", "")
+    for b in results.get("bookmakers") or []:
+        if b.get("key") != PINNACLE:
+            continue
+        for m in b.get("markets") or []:
+            if m.get("key") != "h2h" or m.get("period"):
+                continue
+            outs = m.get("outcomes") or []
+            names = h2h_sides([o.get("name", "") for o in outs], home, away) or {}
+            for o in outs:
+                s = by_id.get(o.get("outcome_id")) or names.get(o.get("name", ""))
+                pin.append((s, o.get("resolution")))
+    info["result_outcomes"] = len(pin)
+    ours = [r for s, r in pin if s == side]
+    if pin and all(r == "void" for _, r in pin):
+        info["reason"] = "meci anulat (void la Pinnacle)"
+        return "void", None, info
+    if ours and ours[0] in ("won", "lost"):
+        res = ours[0]
+        if score_side is not None and (res == "won") != (score_side == side):
+            info["reason"] = f"rezolvarea Pinnacle ({res}) nu se potrivește cu scorul {hs}-{as_}"
+            return None, None, info
+        return res, None, info
+    if score_side is not None and not pin:
+        info["source"] = "scor (Pinnacle fără rezolvare)"
+        return ("won" if score_side == side else "lost"), None, info
+    return None, None, info
+
+
+def decide_h2h(pred: tuple, quotes: list[Quote], results: dict):
+    pid, _eid, _player, _name, side, _line, price_dec, stake, _ctrl, commence, _status = pred
+    res, actual, info = result_h2h(side, results, quotes)
+    if res is None:
+        return None
+    b = benchmark_h2h(side, price_dec, quotes, commence)
+    if res == "void":
+        b = Benchmark(b.benchmark, None, b.closing_price_american, b.closing_price_decimal, b.closing_p_no_vig,
+                      b.closing_at, False, None, None, b.books)
+    elif b.benchmark == "none":
+        return None
+    return b, res, actual, profit(res, price_dec, stake), {"books": b.books, **info}
+
+
 def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: bool = False) -> dict:
     d: dict = {"settled": [], "pending": [], "warnings": []}
     commit = (lambda: None) if dry_run else conn.commit
@@ -355,7 +480,8 @@ def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: 
     by_event: dict[str, list[tuple]] = {}
     for p in preds:
         by_event.setdefault(p[1], []).append(p)
-    params = {"markets": sport.markets, "bookmakers": ",".join(BOOKS)}
+    h2h = sport.markets == "h2h"
+    params = {"markets": sport.markets, "bookmakers": ",".join(b for b in BOOKS if b in sport.bookmakers)}
     for eid, ps in by_event.items():
         status = ps[0][10]
         if status != "final":
@@ -365,11 +491,14 @@ def settle_sport(conn, api: PropLine, run_id: int, sport: SportConfig, dry_run: 
         r = api.get(f"/sports/{sport.key}/events/{eid}/results", params)
         raw_c = db.save_raw(conn, run_id, "closing", sport.key, c)
         db.save_raw(conn, run_id, "results", sport.key, r)
-        quotes, w = parse_closing(c.data, r.data, known_player_names(conn, eid), sport.markets)
+        if h2h:
+            quotes, w = parse_closing_h2h(c.data)
+        else:
+            quotes, w = parse_closing(c.data, r.data, known_player_names(conn, eid), sport.markets)
         d["warnings"] += w
         save_closing(conn, run_id, raw_c, eid, sport.markets, quotes)
         for p in ps:
-            out = decide(p, quotes, r.data)
+            out = decide_h2h(p, quotes, r.data) if h2h else decide(p, quotes, r.data)
             if out is None:
                 d["pending"].append({"prediction_id": p[0], "event_id": eid, "reason": "fără rezultat sau fără cotă de închidere"})
                 continue

@@ -1,0 +1,115 @@
+{
+ "id": "685220",
+ "sport_key": "soccer_italy_serie_b",
+ "home_team": "Vicenza",
+ "away_team": "Cremonese",
+ "commence_time": "2026-11-08T18:30:00Z",
+ "live": false,
+ "status": "final",
+ "home_score": 1,
+ "away_score": 4,
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Cremonese",
+       "description": "",
+       "outcome_id": 16255026439,
+       "price": 126,
+       "point": null,
+       "resolution": "won",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16255026440,
+       "price": 216,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Vicenza",
+       "description": "",
+       "outcome_id": 16255026441,
+       "price": 268,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      }
+     ]
+    },
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": "h1",
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Cremonese",
+       "description": "",
+       "outcome_id": 16255026442,
+       "price": 190,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16255026443,
+       "price": 125,
+       "point": null,
+       "resolution": "won",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Vicenza",
+       "description": "",
+       "outcome_id": 16255026444,
+       "price": 299,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-08T20:28:31.879516Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "context": null,
+ "upgrade_url": null
+}

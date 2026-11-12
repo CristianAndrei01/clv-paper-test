@@ -1,0 +1,88 @@
+{
+ "id": "685074",
+ "sport_key": "soccer_spain_segunda_division",
+ "home_team": "UD Las Palmas",
+ "away_team": "CD Eldense",
+ "commence_time": "2026-11-09T19:30:00Z",
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Las Palmas",
+       "description": "",
+       "outcome_id": 16260934843,
+       "price": 114,
+       "point": null,
+       "closing_at": "2026-11-09T19:21:19.799187Z",
+       "closing_age_seconds": 520,
+       "closing_last_seen_at": "2026-11-09T19:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-09T19:20:47Z",
+       "book_version": 3800563664,
+       "opening_price": 111,
+       "opening_point": null,
+       "opening_at": "2026-11-07T05:41:51.653505Z",
+       "opening_age_seconds": 222488,
+       "liquidity": 4500.0,
+       "opening_liquidity": 250.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Eldense",
+       "description": "",
+       "outcome_id": 16260934842,
+       "price": 260,
+       "point": null,
+       "closing_at": "2026-11-09T19:21:19.799187Z",
+       "closing_age_seconds": 520,
+       "closing_last_seen_at": "2026-11-09T19:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-09T19:20:47Z",
+       "book_version": 3800563664,
+       "opening_price": 238,
+       "opening_point": null,
+       "opening_at": "2026-11-07T05:41:51.653505Z",
+       "opening_age_seconds": 222488,
+       "liquidity": 4500.0,
+       "opening_liquidity": 250.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16260934841,
+       "price": 251,
+       "point": null,
+       "closing_at": "2026-11-09T19:21:19.799187Z",
+       "closing_age_seconds": 520,
+       "closing_last_seen_at": "2026-11-09T19:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-09T19:20:47Z",
+       "book_version": 3800563664,
+       "opening_price": 247,
+       "opening_point": null,
+       "opening_at": "2026-11-07T05:41:51.653505Z",
+       "opening_age_seconds": 222488,
+       "liquidity": 4500.0,
+       "opening_liquidity": 250.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "upgrade_url": null
+}

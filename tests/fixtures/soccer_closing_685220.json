@@ -1,0 +1,88 @@
+{
+ "id": "685220",
+ "sport_key": "soccer_italy_serie_b",
+ "home_team": "Vicenza",
+ "away_team": "Cremonese",
+ "commence_time": "2026-11-08T18:30:00Z",
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "line_type": "main",
+     "outcomes": [
+      {
+       "name": "Vicenza",
+       "description": "",
+       "outcome_id": 16255026441,
+       "price": 268,
+       "point": null,
+       "closing_at": "2026-11-08T18:24:54.607766Z",
+       "closing_age_seconds": 305,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:24:32Z",
+       "book_version": 3799826056,
+       "opening_price": 195,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Cremonese",
+       "description": "",
+       "outcome_id": 16255026439,
+       "price": 126,
+       "point": null,
+       "closing_at": "2026-11-08T18:10:38.887249Z",
+       "closing_age_seconds": 1161,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:09:26Z",
+       "book_version": 3799779544,
+       "opening_price": 145,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      },
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16255026440,
+       "price": 216,
+       "point": null,
+       "closing_at": "2026-11-08T18:24:54.607766Z",
+       "closing_age_seconds": 305,
+       "closing_last_seen_at": "2026-11-08T18:30:00Z",
+       "is_stale": false,
+       "book_updated_at": "2026-11-08T18:24:32Z",
+       "book_version": 3799826056,
+       "opening_price": 223,
+       "opening_point": null,
+       "opening_at": "2026-11-01T18:59:31.775455Z",
+       "opening_age_seconds": 603028,
+       "liquidity": 4500.0,
+       "opening_liquidity": 150.0,
+       "redacted": false,
+       "dfs_odds_type": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "upgrade_url": null
+}

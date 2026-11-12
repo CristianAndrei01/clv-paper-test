@@ -45,6 +45,23 @@ O rulare pe zi de NBA, cu 2–3 ore înainte de primul meci (ziua după ora SUA 
 
 Predictorul rulează în GitHub Actions doar dacă secretul `ANTHROPIC_API_KEY` există.
 
+## Fotbal (Serie B + Segunda, 1X2) — construit, inactiv
+
+Același pipeline, altă configurație (`clvtest/config.py`); doar Pinnacle. Se activează adăugând ligile în
+`ACTIVE_SPORTS` din `.github/workflows/tick.yml`, după 3 zile curate de NBA.
+
+- Colector: un snapshot la 12 ore în ultimele 72 de ore înainte de meci și unul cu 30–60 de minute înainte de start.
+  Partea 1/X/2 se ia din câmpul `side` al API-ului, pentru că numele echipelor din cote diferă de cele ale meciului
+  („Leganes” față de „Leganés”).
+- Predictor (`prompts/soccer-v1.md`): o singură dată pe meci, cât timp meciul e la 20–28 de ore de start (24 h ± 4,
+  pentru că tick-urile rulează doar 14:00–05:00 UTC); meciurile intrate în fereastră în același tick merg într-un singur
+  apel. Maximum 5 pariuri AI pe etapă și ligă; etapa = săptămâna marți–luni, în ora ligii. Controlul se alege la
+  întâmplare dintre rezultatele 1/X/2 ale acelorași meciuri.
+- Decontare: închiderea Pinnacle (văzută cu ≤ 30 de minute înainte de start), devig pe trei rezultate; fără consens
+  și fără linii mutate. Rezultatul: rezolvarea Pinnacle pe timpul regulamentar (fără piața de la pauză), verificată
+  cu scorul; dacă nu se potrivesc, pariul rămâne nedecontat. Meciurile amânate sau „expired” rămân nedecontate.
+- Raport: seriile rămân separate pe ligă, plus un bloc „FOTBAL ÎMPREUNĂ” cu ținta de 60 (SPEC §2).
+
 ## Decontare și raport (Faza 3)
 
 ```

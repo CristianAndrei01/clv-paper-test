@@ -1,0 +1,115 @@
+{
+ "id": "685074",
+ "sport_key": "soccer_spain_segunda_division",
+ "home_team": "UD Las Palmas",
+ "away_team": "CD Eldense",
+ "commence_time": "2026-11-09T19:30:00Z",
+ "live": false,
+ "status": "final",
+ "home_score": 2,
+ "away_score": 0,
+ "bookmakers": [
+  {
+   "key": "pinnacle",
+   "title": "Pinnacle",
+   "markets": [
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": null,
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16260934841,
+       "price": 251,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Eldense",
+       "description": "",
+       "outcome_id": 16260934842,
+       "price": 261,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Las Palmas",
+       "description": "",
+       "outcome_id": 16260934843,
+       "price": 113,
+       "point": null,
+       "resolution": "won",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      }
+     ]
+    },
+    {
+     "key": "h2h",
+     "description": "Moneyline",
+     "period": "h1",
+     "team": null,
+     "outcomes": [
+      {
+       "name": "Draw",
+       "description": "",
+       "outcome_id": 16260934844,
+       "price": -361,
+       "point": null,
+       "resolution": "won",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Eldense",
+       "description": "",
+       "outcome_id": 16260934845,
+       "price": 795,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      },
+      {
+       "name": "Las Palmas",
+       "description": "",
+       "outcome_id": 16260934846,
+       "price": 487,
+       "point": null,
+       "resolution": "lost",
+       "actual_value": null,
+       "resolved_at": "2026-11-09T21:30:20.029582Z",
+       "redacted": false,
+       "dfs_odds_type": null,
+       "player_id": null
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "context": null,
+ "upgrade_url": null
+}

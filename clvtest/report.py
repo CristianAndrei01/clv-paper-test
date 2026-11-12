@@ -16,7 +16,9 @@ from dataclasses import dataclass, field
 
 from . import db
 
-TARGETS = {"basketball_nba": 300, "soccer_italy_serie_b": 60, "soccer_spain_segunda_division": 60}
+TARGETS = {"basketball_nba": 300}
+SOCCER = ("soccer_italy_serie_b", "soccer_spain_segunda_division")
+SOCCER_TARGET = 60                 # Serie B + Segunda împreună (SPEC §2)
 BOOTSTRAP_N = 10_000
 BOOTSTRAP_SEED = 20261111          # fix, ca raportul să iasă identic la fiecare rulare
 ROI_MIN_BETS = 1000
@@ -194,6 +196,29 @@ def render_group(name: str, g: GroupStats) -> list[str]:
     return out
 
 
+def render_block(title: str, niche: str, bets: list[Bet], target: int | None) -> list[str]:
+    ai = group_stats([b for b in bets if not b.is_control])
+    ctrl = group_stats([b for b in bets if b.is_control])
+    lines = [title, f"  nișă {niche}: {ai.settled} pariuri AI decontate" + (f" din ținta de {target}" if target else "")]
+    lines += render_group("AI", ai)
+    lines += render_group("CONTROL", ctrl)
+    c = ctrl.clv["total"]
+    if c.ci and c.ci[0] > 0:
+        lines.append("  ATENȚIE: CLV-ul grupului de control iese clar pozitiv — măsurătoarea e suspectă (SPEC §4.2).")
+    a_txt = verdict_a(ai.clv["total"])
+    b_ok, b_txt = favourable_b(ai.moved, ctrl.moved)
+    a_ok = a_txt.startswith("peste +3% și IC")
+    final = target is not None and ai.settled >= target
+    lines.append(f"  VERDICT {'(FINAL)' if final else f'(PROVIZORIU: {ai.settled}/{target or "?"}, testul nu se oprește mai devreme)'}")
+    lines.append(f"    (a) total: {a_txt}")
+    pin = ai.clv["pinnacle"]
+    lines.append(f"        doar Pinnacle: n={pin.n}, CLV mediu {pct(pin.mean)}  {ci_str(pin.ci)}")
+    lines.append(f"    (b) {'favorabil' if b_ok else 'nefavorabil'}: {b_txt}")
+    lines.append(f"    Verdict pozitiv (cer ambele): {'DA' if a_ok and b_ok else 'NU'}")
+    lines.append("")
+    return lines
+
+
 def render(data: dict[tuple[str, str], list[Bet]], chain: tuple[int, int | None]) -> str:
     checked, bad = chain
     lines = ["RAPORT CLV — test pe hârtie (miză fictivă 100 lei)",
@@ -201,29 +226,21 @@ def render(data: dict[tuple[str, str], list[Bet]], chain: tuple[int, int | None]
              + ("INTACT" if bad is None else f"RUPT la seq {bad}"), ""]
     if not data:
         lines.append("Nicio predicție încă.")
+    soccer: dict[str, list[tuple[str, list[Bet]]]] = {}
     for (sid, sport), bets in data.items():
-        ai = group_stats([b for b in bets if not b.is_control])
-        ctrl = group_stats([b for b in bets if b.is_control])
-        target = TARGETS.get(sport)
-        lines.append(f"SERIA {sid}")
-        lines.append(f"  nișă {sport}: {ai.settled} pariuri AI decontate"
-                     + (f" din ținta de {target}" if target else ""))
-        lines += render_group("AI", ai)
-        lines += render_group("CONTROL", ctrl)
-        c = ctrl.clv["total"]
-        if c.ci and c.ci[0] > 0:
-            lines.append("  ATENȚIE: CLV-ul grupului de control iese clar pozitiv — măsurătoarea e suspectă (SPEC §4.2).")
-        a_txt = verdict_a(ai.clv["total"])
-        b_ok, b_txt = favourable_b(ai.moved, ctrl.moved)
-        a_ok = a_txt.startswith("peste +3% și IC")
-        final = target is not None and ai.settled >= target
-        lines.append(f"  VERDICT {'(FINAL)' if final else f'(PROVIZORIU: {ai.settled}/{target or "?"}, testul nu se oprește mai devreme)'}")
-        lines.append(f"    (a) total: {a_txt}")
-        pin = ai.clv["pinnacle"]
-        lines.append(f"        doar Pinnacle: n={pin.n}, CLV mediu {pct(pin.mean)}  {ci_str(pin.ci)}")
-        lines.append(f"    (b) {'favorabil' if b_ok else 'nefavorabil'}: {b_txt}")
-        lines.append(f"    Verdict pozitiv (cer ambele): {'DA' if a_ok and b_ok else 'NU'}")
-        lines.append("")
+        if sport in SOCCER:
+            soccer.setdefault(sid.split("|", 1)[1], []).append((sport, bets))
+            target = None                       # ținta de 60 e pentru ambele ligi împreună (SPEC §2)
+        else:
+            target = TARGETS.get(sport)
+        lines += render_block(f"SERIA {sid}", sport, bets, target)
+    # SPEC §2 și §8: fotbalul are o singură țintă, 60 de pariuri pe Serie B + Segunda. Seriile rămân separate
+    # pe ligă (sport_key), dar cele cu aceeași configurație (model, prompt, prag) se adună aici.
+    for cfg, parts in soccer.items():
+        bets = [b for _, bs in parts for b in bs]
+        leagues = " + ".join(sorted(sp for sp, _ in parts))
+        lines += render_block(f"FOTBAL ÎMPREUNĂ ({leagues}) — configurația {cfg}",
+                              "fotbal, concluzie doar orientativă (SPEC §8)", bets, SOCCER_TARGET)
     return "\n".join(lines)
 
 

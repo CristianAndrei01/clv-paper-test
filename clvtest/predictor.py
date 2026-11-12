@@ -1,4 +1,5 @@
-"""Predictor (SPEC §4.2). O singură rulare pe zi de NBA, cu 2–3 ore înainte de primul meci.
+"""Predictor (SPEC §4.2). NBA: o singură rulare pe zi, cu 2–3 ore înainte de primul meci.
+Fotbal (1X2): o singură dată pe meci, cu ~24 de ore înainte de start; maximum 5 pariuri pe etapă și ligă.
 
 Fluxul unei rulări:
   1. snapshot Pinnacle proaspăt (rolul colector) -> liniile oferite modelului;
@@ -19,6 +20,7 @@ import random
 import secrets
 import traceback
 import uuid
+from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -45,50 +47,79 @@ class Outcome:
     player_id: str | None
     player_name: str | None
     side: str
-    line: float
+    line: float | None
     price_american: int
     price_decimal: float
     last_seen_at: datetime
     is_stale: bool
 
 
-@dataclass(frozen=True)
+PLAYER_SIDES = ("over", "under")
+H2H_SIDES = ("1", "X", "2")
+
+
+def market_sides(market: str) -> tuple[str, ...]:
+    return H2H_SIDES if market == "h2h" else PLAYER_SIDES
+
+
+@dataclass(frozen=True, eq=False)
 class Line:
-    """O linie (meci, jucător, puncte) cu ambele părți și probabilitățile fără marjă."""
+    """O piață completă: (meci, jucător, linie) cu over/under, sau (meci) cu 1/X/2 la h2h,
+    cu toate părțile și probabilitățile fără marjă."""
     event_id: str
     player_id: str | None
     player_name: str | None
-    line: float
-    over: Outcome
-    under: Outcome
-    p_over: float
-    p_under: float
+    line: float | None
+    outcomes: dict[str, Outcome]
+    probs: dict[str, float]
 
     def side(self, side: str) -> Outcome:
-        return self.over if side == "over" else self.under
+        return self.outcomes[side]
 
     def p(self, side: str) -> float:
-        return self.p_over if side == "over" else self.p_under
+        return self.probs[side]
+
+    @property
+    def sides(self) -> tuple[str, ...]:
+        return tuple(self.outcomes)
+
+    # NBA: numele vechi, folosite în mesajul către model și în teste
+    @property
+    def over(self) -> Outcome:
+        return self.outcomes["over"]
+
+    @property
+    def under(self) -> Outcome:
+        return self.outcomes["under"]
+
+    @property
+    def p_over(self) -> float:
+        return self.probs["over"]
+
+    @property
+    def p_under(self) -> float:
+        return self.probs["under"]
 
     @property
     def key(self) -> tuple:
         return (self.event_id, self.player_id or self.player_name)
 
 
-def build_lines(outcomes: list[Outcome], now: datetime) -> list[Line]:
-    """Perechi over/under la aceeași linie; doar cote actuale (last_seen_at ≤ 15 min, fără is_stale)."""
+def build_lines(outcomes: list[Outcome], now: datetime, sides: tuple[str, ...] = PLAYER_SIDES) -> list[Line]:
+    """Piețe complete (toate părțile la aceeași linie); doar cote actuale (last_seen_at ≤ 15 min, fără is_stale)."""
     by_key: dict[tuple, dict[str, Outcome]] = {}
     for o in outcomes:
-        if o.is_stale or now - o.last_seen_at > timedelta(minutes=FRESH_MINUTES):
+        if o.side not in sides or o.is_stale or now - o.last_seen_at > timedelta(minutes=FRESH_MINUTES):
             continue
         by_key.setdefault((o.event_id, o.player_id or o.player_name, o.line), {})[o.side] = o
     lines = []
-    for (eid, _, ln), sides in by_key.items():
-        if "over" in sides and "under" in sides:
-            ov, un = sides["over"], sides["under"]
-            p_over, p_under = no_vig_multiplicative([ov.price_decimal, un.price_decimal])
-            lines.append(Line(eid, ov.player_id, ov.player_name, ln, ov, un, p_over, p_under))
-    lines.sort(key=lambda l: (l.event_id, l.player_name or "", l.line))
+    for (eid, _, ln), found in by_key.items():
+        if all(s in found for s in sides):
+            outs = {s: found[s] for s in sides}
+            probs = no_vig_multiplicative([outs[s].price_decimal for s in sides])
+            first = outs[sides[0]]
+            lines.append(Line(eid, first.player_id, first.player_name, ln, outs, dict(zip(sides, probs))))
+    lines.sort(key=lambda l: (l.event_id, l.player_name or "", l.line if l.line is not None else 0.0))
     return lines
 
 
@@ -104,7 +135,8 @@ def load_outcomes(conn, market: str, event_ids: list[str], since: datetime) -> l
            order by event_id, coalesce(player_id, player_name), side, snapshot_at desc""",
         (PINNACLE, market, event_ids, since),
     ).fetchall()
-    return [Outcome(r[0], r[1], r[2], r[3], r[4], float(r[5]), r[6], float(r[7]), r[8], r[9]) for r in rows]
+    return [Outcome(r[0], r[1], r[2], r[3], r[4], float(r[5]) if r[5] is not None else None, r[6], float(r[7]),
+                    r[8], r[9]) for r in rows]
 
 
 # ---------------------------------------------------------------- când rulează
@@ -127,6 +159,23 @@ def predictor_due(sport: SportConfig, games: list[tuple], now: datetime, already
     return timedelta(hours=lo) <= first - now <= timedelta(hours=hi)
 
 
+def hours_to(event: tuple, now: datetime) -> float:
+    return (event[4] - now).total_seconds() / 3600
+
+
+def match_games(sport: SportConfig, events: list[tuple], now: datetime, offered_before: set[str]) -> list[tuple]:
+    """Fotbal: meciurile aflate acum în fereastra de ~24 de ore și neoferite încă modelului (o dată pe meci)."""
+    lo, hi = sport.predictor_hours_before
+    return sorted((e for e in events if e[0] not in offered_before and lo <= hours_to(e, now) <= hi),
+                  key=lambda e: e[4])
+
+
+def round_key(sport: SportConfig, commence: datetime) -> str:
+    """Etapa unui meci = săptămâna marți–luni (ora ligii) care îl conține; cheia = data de marți."""
+    d = commence.astimezone(ZoneInfo(sport.round_tz)).date()
+    return str(d - timedelta(days=(d.weekday() - 1) % 7))
+
+
 # ---------------------------------------------------------------- seria
 def prompt_version(sport: SportConfig) -> tuple[str, str]:
     path = ROOT / sport.prompt_file
@@ -137,7 +186,8 @@ def prompt_version(sport: SportConfig) -> tuple[str, str]:
 
 def series_id(sport: SportConfig, cfg: PredictorConfig, pversion: str) -> str:
     return (f"{sport.key}|{cfg.model}|{pversion}|effort={cfg.effort}"
-            f"|edge={cfg.edge_threshold:g}|search={cfg.max_searches}|cap={sport.daily_cap}")
+            f"|edge={cfg.edge_threshold:g}|search={cfg.max_searches}|cap={sport.daily_cap}"
+            + ("" if sport.cap_period == "day" else f"/{sport.cap_period}"))
 
 
 def ensure_series(conn, sid: str, sport: SportConfig, cfg: PredictorConfig, pversion: str) -> None:
@@ -146,40 +196,62 @@ def ensure_series(conn, sid: str, sport: SportConfig, cfg: PredictorConfig, pver
            values (%s, %s, %s, %s, %s, %s) on conflict (id) do nothing""",
         (sid, sport.key, cfg.model, pversion, cfg.edge_threshold,
          Jsonb({"effort": cfg.effort, "max_searches": cfg.max_searches, "max_tokens": cfg.max_tokens,
-                "daily_cap": sport.daily_cap, "prompt_file": sport.prompt_file,
+                "daily_cap": sport.daily_cap, "cap_period": sport.cap_period, "prompt_file": sport.prompt_file,
+                "predictor_mode": sport.predictor_mode,
+                "predictor_hours_before": list(sport.predictor_hours_before),
                 "fresh_minutes": FRESH_MINUTES, "web_search_tool": "web_search_20260209"})),
     )
 
 
 # ---------------------------------------------------------------- model
-RECORD_PICKS_TOOL = {
-    "name": "record_picks",
-    "description": "Record the final picks. Call exactly once, at the end, with every pick (an empty list if none).",
-    "strict": True,
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "picks": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "line_id": {"type": "string"},
-                        "side": {"type": "string", "enum": ["over", "under"]},
-                        "p_model": {"type": "number"},
-                        "reason": {"type": "string"},
-                        "sources": {"type": "array", "items": {"type": "string"}},
+def record_picks_tool(sides: tuple[str, ...] = PLAYER_SIDES) -> dict:
+    return {
+        "name": "record_picks",
+        "description": "Record the final picks. Call exactly once, at the end, with every pick (an empty list if none).",
+        "strict": True,
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "picks": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "line_id": {"type": "string"},
+                            "side": {"type": "string", "enum": list(sides)},
+                            "p_model": {"type": "number"},
+                            "reason": {"type": "string"},
+                            "sources": {"type": "array", "items": {"type": "string"}},
+                        },
+                        "required": ["line_id", "side", "p_model", "reason", "sources"],
+                        "additionalProperties": False,
                     },
-                    "required": ["line_id", "side", "p_model", "reason", "sources"],
-                    "additionalProperties": False,
                 },
+                "notes": {"type": "string"},
             },
-            "notes": {"type": "string"},
+            "required": ["picks", "notes"],
+            "additionalProperties": False,
         },
-        "required": ["picks", "notes"],
-        "additionalProperties": False,
-    },
-}
+    }
+
+
+RECORD_PICKS_TOOL = record_picks_tool()
+LEAGUE_NAMES = {"soccer_italy_serie_b": "Serie B (Italy)", "soccer_spain_segunda_division": "Segunda División (Spain)"}
+
+
+def user_message_h2h(now: datetime, sport_key: str, games: list[tuple], ids: dict[str, Line]) -> str:
+    label = {e[0]: f"{e[1]} vs {e[2]}" for e in games}
+    out = [f"Current time (UTC): {now:%Y-%m-%d %H:%M}", f"League: {LEAGUE_NAMES.get(sport_key, sport_key)}", "",
+           "Matches (home vs away, kick-off UTC):"]
+    for e in sorted(games, key=lambda e: e[4]):
+        out.append(f"- {e[1]} vs {e[2]} — {e[4]:%Y-%m-%d %H:%M}")
+    out += ["", "Pinnacle full-time 1X2:",
+            "id | match | 1 home (decimal) | X draw (decimal) | 2 away (decimal) | p1 no-vig | pX no-vig | p2 no-vig"]
+    for lid, l in ids.items():
+        out.append(f"{lid} | {label.get(l.event_id, l.event_id)} | "
+                   + " | ".join(f"{l.side(s).price_decimal:.3f}" for s in H2H_SIDES) + " | "
+                   + " | ".join(f"{l.p(s):.3f}" for s in H2H_SIDES))
+    return "\n".join(out)
 
 
 def user_message(now: datetime, games: list[tuple], lines: list[Line], ids: dict[str, Line]) -> str:
@@ -224,13 +296,14 @@ def _add_usage(total: dict, u) -> None:
         total["web_search_requests"] = total.get("web_search_requests", 0) + (getattr(stu, "web_search_requests", 0) or 0)
 
 
-def call_model(cfg: PredictorConfig, system_prompt: str, message: str) -> ModelResult:
+def call_model(cfg: PredictorConfig, system_prompt: str, message: str,
+               sides: tuple[str, ...] = PLAYER_SIDES) -> ModelResult:
     """Un singur răspuns final prin `record_picks`. Fără fallback pe alt model: seria rămâne curată."""
     import anthropic  # importat aici ca testele fără cheie să nu depindă de el
 
     client = anthropic.Anthropic(api_key=require("ANTHROPIC_API_KEY"), max_retries=3, timeout=1200)
     tools = [{"type": "web_search_20260209", "name": "web_search", "max_uses": cfg.max_searches},
-             RECORD_PICKS_TOOL]
+             record_picks_tool(sides)]
     messages: list[dict] = [{"role": "user", "content": message}]
     usage: dict = {}
     urls: list[str] = []
@@ -277,7 +350,7 @@ def fake_model(lines_by_id: dict[str, Line]) -> ModelResult:
     """Doar pentru --dry-run: alege două linii cu un avantaj artificial, fără niciun apel API."""
     picks = []
     for lid, l in list(lines_by_id.items())[:2]:
-        side = "over" if l.p_over <= l.p_under else "under"
+        side = min(l.sides, key=l.p)          # partea cea mai puțin probabilă (NBA: over la egalitate)
         picks.append({"line_id": lid, "side": side, "p_model": min(0.95, l.p(side) + 0.08),
                       "reason": "test (dry-run)", "sources": []})
     return ModelResult(picks=picks, notes="fake", model="fake", stop_reason="fake")
@@ -296,8 +369,12 @@ class Candidate:
 
 
 def select_picks(result: ModelResult, offered: dict[str, Line], fresh: list[Line],
-                 threshold: float, cap: int) -> tuple[list[Candidate], list[dict]]:
-    """Potrivește pariurile modelului cu snapshot-ul nou, aplică pragul și limita zilnică."""
+                 threshold: float, cap: int, group_of=None,
+                 caps: dict | None = None) -> tuple[list[Candidate], list[dict]]:
+    """Potrivește pariurile modelului cu snapshot-ul nou, aplică pragul și limita.
+
+    Fără `group_of`: maximum `cap` pariuri (limita zilnică NBA). Cu `group_of` (etapa unui meci de fotbal):
+    maximum `caps[etapă]` pariuri pe fiecare etapă, cele cu avantajul cel mai mare."""
     fresh_by_key: dict[tuple, Line] = {l.key: l for l in fresh}
     found = set(result.search_urls)
     chosen, skipped, seen = [], [], set()
@@ -308,7 +385,7 @@ def select_picks(result: ModelResult, offered: dict[str, Line], fresh: list[Line
             pm = float(p.get("p_model"))
         except (TypeError, ValueError):
             pm = -1.0
-        if old is None or side not in ("over", "under") or not 0 < pm < 1:
+        if old is None or side not in old.sides or not 0 < pm < 1:
             skipped.append({"line_id": lid, "reason": "invalid"})
             continue
         if old.key in seen:
@@ -330,15 +407,27 @@ def select_picks(result: ModelResult, offered: dict[str, Line], fresh: list[Line
         sources = [{"url": u, "found_in_search": u in found} for u in p.get("sources") or []]
         chosen.append(Candidate(new, side, pm, edge, (p.get("reason") or "")[:2000], sources, lid))
     chosen.sort(key=lambda c: c.edge, reverse=True)
-    for c in chosen[cap:]:
-        skipped.append({"line_id": c.line_id, "reason": "over_daily_cap", "edge": round(c.edge, 4)})
-    return chosen[:cap], skipped
+    if group_of is None:
+        for c in chosen[cap:]:
+            skipped.append({"line_id": c.line_id, "reason": "over_daily_cap", "edge": round(c.edge, 4)})
+        return chosen[:cap], skipped
+    left = dict(caps or {})
+    kept = []
+    for c in chosen:
+        g = group_of(c)
+        if left.setdefault(g, cap) > 0:
+            left[g] -= 1
+            kept.append(c)
+        else:
+            skipped.append({"line_id": c.line_id, "reason": "over_round_cap", "round": g, "edge": round(c.edge, 4)})
+    return kept, skipped
 
 
 def control_pool(fresh: list[Line]) -> list[tuple[Line, str]]:
     """Toate (linie, parte) eligibile, într-o ordine deterministă, ca alegerea să fie reproductibilă din seed."""
-    pool = [(l, s) for l in fresh for s in ("over", "under")]
-    pool.sort(key=lambda x: (x[0].event_id, x[0].player_id or "", x[0].player_name or "", x[0].line, x[1]))
+    pool = [(l, s) for l in fresh for s in l.sides]
+    pool.sort(key=lambda x: (x[0].event_id, x[0].player_id or "", x[0].player_name or "",
+                             x[0].line if x[0].line is not None else 0.0, x[1]))
     return pool
 
 
@@ -379,16 +468,33 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
         "select id, home_team, away_team, sport_key, commence_time from clv.predictor_events where sport_key = %s",
         (sport.key,),
     ).fetchall()
-    games = day_games(sport, events, now)
-    gday = str(game_day(sport, now))
-    done = pconn.execute(
-        """select exists(select 1 from clv.predictor_runs
-                         where status = 'ok' and details->>'sport_key' = %s and details->>'game_day' = %s
-                           and coalesce(details->>'dry_run', 'false') <> 'true')
-               or exists(select 1 from clv.predictions where series_id = %s and event_id = any(%s))""",
-        (sport.key, gday, sid, [e[0] for e in games]),
-    ).fetchone()[0]
-    if not force and not predictor_due(sport, games, now, done):
+    if sport.predictor_mode == "match":
+        # o singură dată pe meci: meciurile oferite deja modelului într-o rulare reușită nu mai intră
+        offered_before = {r[0] for r in pconn.execute(
+            """select distinct jsonb_array_elements_text(details->'event_ids') from clv.predictor_runs
+               where status = 'ok' and details->>'sport_key' = %s and coalesce(details->>'dry_run', 'false') <> 'true'""",
+            (sport.key,),
+        ).fetchall()}
+        offered_before |= {r[0] for r in pconn.execute(
+            "select distinct event_id from clv.predictions where series_id = %s", (sid,)).fetchall()}
+        games = match_games(sport, events, now, offered_before)
+        if force and not games:          # doar pentru --dry-run --force: următoarele meciuri neoferite
+            games = sorted((e for e in events if e[0] not in offered_before and 0 < hours_to(e, now) <= 72),
+                           key=lambda e: e[4])
+        gday = None
+        due = bool(games)
+    else:
+        games = day_games(sport, events, now)
+        gday = str(game_day(sport, now))
+        done = pconn.execute(
+            """select exists(select 1 from clv.predictor_runs
+                             where status = 'ok' and details->>'sport_key' = %s and details->>'game_day' = %s
+                               and coalesce(details->>'dry_run', 'false') <> 'true')
+                   or exists(select 1 from clv.predictions where series_id = %s and event_id = any(%s))""",
+            (sport.key, gday, sid, [e[0] for e in games]),
+        ).fetchone()[0]
+        due = predictor_due(sport, games, now, done)
+    if not games or (not force and not due):
         pconn.close(); cconn.close(); api.close()
         return 0
 
@@ -399,7 +505,8 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
     ).fetchone()[0]
     pconn.commit()
     details: dict = {"sport_key": sport.key, "game_day": gday, "dry_run": dry_run, "fake_model": fake,
-                     "series_id": sid, "games": len(games)}
+                     "series_id": sid, "games": len(games), "event_ids": [e[0] for e in games]}
+    sides = market_sides(sport.markets)
     usage: dict = {}
     try:
         # seria se creează în aceeași tranzacție cu predicțiile: la dry-run sau eroare nu rămâne nimic
@@ -409,15 +516,19 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
         # 1. snapshot proaspăt -> liniile oferite modelului
         t1 = db.db_now(pconn)
         store_odds_snapshot(cconn, api, run_id, sport, "predictor")
-        lines1 = build_lines(load_outcomes(pconn, sport.markets, event_ids, t1), db.db_now(pconn))
-        offered = {f"L{i + 1}": l for i, l in enumerate(lines1)}
+        lines1 = build_lines(load_outcomes(pconn, sport.markets, event_ids, t1), db.db_now(pconn), sides)
+        prefix = "M" if sport.markets == "h2h" else "L"
+        offered = {f"{prefix}{i + 1}": l for i, l in enumerate(lines1)}
         details["lines_offered"] = len(offered)
         if not offered:
             raise RuntimeError("nicio linie Pinnacle actuală pentru meciurile zilei")
 
         # 2. modelul
-        message = user_message(db.db_now(pconn), games, lines1, offered)
-        result = fake_model(offered) if fake else call_model(cfg, system_prompt, message)
+        if sport.markets == "h2h":
+            message = user_message_h2h(db.db_now(pconn), sport.key, games, offered)
+        else:
+            message = user_message(db.db_now(pconn), games, lines1, offered)
+        result = fake_model(offered) if fake else call_model(cfg, system_prompt, message, sides)
         usage = result.usage
         if not fake and result.model != cfg.model:
             raise RuntimeError(f"a răspuns alt model ({result.model}) decât cel al seriei ({cfg.model})")
@@ -428,13 +539,25 @@ def run_sport(sport: SportConfig, cfg: PredictorConfig, *, dry_run: bool, fake: 
         # 3. snapshot nou după model; pariurile se iau la cota de acum
         t2 = db.db_now(pconn)
         store_odds_snapshot(cconn, api, run_id, sport, "predictor")
-        lines2 = build_lines(load_outcomes(pconn, sport.markets, event_ids, t2), db.db_now(pconn))
-        already = pconn.execute(
-            """select count(*) from clv.predictions
-               where series_id = %s and not is_control and event_id = any(%s)""",
-            (sid, event_ids),
-        ).fetchone()[0]
-        chosen, skipped = select_picks(result, offered, lines2, cfg.edge_threshold, max(0, sport.daily_cap - already))
+        lines2 = build_lines(load_outcomes(pconn, sport.markets, event_ids, t2), db.db_now(pconn), sides)
+        if sport.cap_period == "round":
+            # SPEC §4.2: maximum 5 pariuri AI pe etapă și ligă, numărate și din rulările anterioare
+            used = Counter(round_key(sport, created + timedelta(hours=float(h))) for created, h in pconn.execute(
+                "select created_at, hours_to_start from clv.predictions where series_id = %s and not is_control",
+                (sid,)).fetchall())
+            commence = {e[0]: e[4] for e in games}
+            rounds = {round_key(sport, ct) for ct in commence.values()}
+            caps = {g: max(0, sport.daily_cap - used[g]) for g in rounds}
+            details["round_caps_left"] = caps
+            chosen, skipped = select_picks(result, offered, lines2, cfg.edge_threshold, sport.daily_cap,
+                                           group_of=lambda c: round_key(sport, commence[c.line.event_id]), caps=caps)
+        else:
+            already = pconn.execute(
+                """select count(*) from clv.predictions
+                   where series_id = %s and not is_control and event_id = any(%s)""",
+                (sid, event_ids),
+            ).fetchone()[0]
+            chosen, skipped = select_picks(result, offered, lines2, cfg.edge_threshold, max(0, sport.daily_cap - already))
 
         # 4–5. control + inserare, fiecare pereche într-un savepoint (tranzacția e deja deschisă,
         #      deci pconn.transaction() creează SAVEPOINT, nu COMMIT)
